@@ -350,10 +350,10 @@ namespace DoubleTrackBar
                 }
 
                 // Left mark knob			
-                _lMarkPnt[0].X = _pixelPosL - _markWidth; _lMarkPnt[0].Y = markyoff + _markHeight / 3;
-                _lMarkPnt[1].X = _pixelPosL; _lMarkPnt[1].Y = markyoff;
-                _lMarkPnt[2].X = _pixelPosL; _lMarkPnt[2].Y = markyoff + _markHeight;
-                _lMarkPnt[3].X = _pixelPosL - _markWidth; _lMarkPnt[3].Y = markyoff + 2 * _markHeight / 3;
+                _lMarkPnt[0].X = _pixelPosL - _markWidth / 2; _lMarkPnt[0].Y = markyoff + _markHeight / 50;
+                _lMarkPnt[1].X = _pixelPosL + _markWidth / 2; _lMarkPnt[1].Y = markyoff;
+                _lMarkPnt[2].X = _pixelPosL + _markWidth / 2; _lMarkPnt[2].Y = markyoff + _markHeight;
+                _lMarkPnt[3].X = _pixelPosL - _markWidth / 2; _lMarkPnt[3].Y = markyoff + _markHeight;
                 _lMarkPnt[4].X = _pixelPosL - _markWidth; _lMarkPnt[4].Y = markyoff;
                 e.Graphics.FillPolygon(brushRange, _lMarkPnt);
                 e.Graphics.DrawLine(penShadowDark, _lMarkPnt[3].X - 1, _lMarkPnt[3].Y, _lMarkPnt[1].X - 1, _lMarkPnt[2].Y); // lower Left shadow
@@ -361,29 +361,25 @@ namespace DoubleTrackBar
                 e.Graphics.DrawLine(penShadowLight, _lMarkPnt[0].X - 1, _lMarkPnt[0].Y, _lMarkPnt[1].X - 1, _lMarkPnt[1].Y); // upper shadow
                 if (_pixelPosL < _pixelPosR)
                     e.Graphics.DrawLine(penShadowDark, _lMarkPnt[1].X, _lMarkPnt[1].Y + 1, _lMarkPnt[1].X, _lMarkPnt[2].Y); // Right shadow
-                if (_activeMark == ActiveMarkType.Left)
-                {
-                    e.Graphics.DrawLine(penShadowLight, _pixelPosL - _markWidth / 2 - 1, markyoff + _markHeight / 3, _pixelPosL - _markWidth / 2 - 1, markyoff + 2 * _markHeight / 3); // active mark
-                    e.Graphics.DrawLine(penShadowDark, _pixelPosL - _markWidth / 2, markyoff + _markHeight / 3, _pixelPosL - _markWidth / 2, markyoff + 2 * _markHeight / 3); // active mark			
-                }
+
+                e.Graphics.DrawLine(penShadowLight, _pixelPosL, markyoff + _markHeight, _pixelPosL, markyoff +_markHeight); // active mark
+                e.Graphics.DrawLine(penShadowDark, _pixelPosL, markyoff + _markHeight / 3, _pixelPosL, markyoff + 2 * _markHeight / 3); // active mark			
 
                 // Right mark knob
-                _rMarkPnt[0].X = _pixelPosR + _markWidth; _rMarkPnt[0].Y = markyoff + _markHeight / 3;
-                _rMarkPnt[1].X = _pixelPosR; _rMarkPnt[1].Y = markyoff;
-                _rMarkPnt[2].X = _pixelPosR; _rMarkPnt[2].Y = markyoff + _markHeight;
-                _rMarkPnt[3].X = _pixelPosR + _markWidth; _rMarkPnt[3].Y = markyoff + 2 * _markHeight / 3;
+                _rMarkPnt[0].X = _pixelPosR + _markWidth / 2; _rMarkPnt[0].Y = markyoff + _markHeight / 50;
+                _rMarkPnt[1].X = _pixelPosR - _markWidth / 2; _rMarkPnt[1].Y = markyoff;
+                _rMarkPnt[2].X = _pixelPosR - _markWidth / 2; _rMarkPnt[2].Y = markyoff + _markHeight;
+                _rMarkPnt[3].X = _pixelPosR + _markWidth / 2; _rMarkPnt[3].Y = markyoff + _markHeight;
                 _rMarkPnt[4].X = _pixelPosR + _markWidth; _rMarkPnt[4].Y = markyoff;
                 e.Graphics.FillPolygon(brushRange, _rMarkPnt);
                 if (_pixelPosL < _pixelPosR)
                     e.Graphics.DrawLine(penShadowLight, _rMarkPnt[1].X - 1, _rMarkPnt[1].Y + 1, _rMarkPnt[2].X - 1, _rMarkPnt[2].Y); // Left shadow
                 e.Graphics.DrawLine(penShadowDark, _rMarkPnt[2].X, _rMarkPnt[2].Y, _rMarkPnt[3].X, _rMarkPnt[3].Y); // lower Right shadow
-                e.Graphics.DrawLine(penShadowDark, _rMarkPnt[0].X, _rMarkPnt[0].Y, _rMarkPnt[1].X, _rMarkPnt[1].Y); // upper shadow
+                e.Graphics.DrawLine(penShadowLight, _rMarkPnt[0].X, _rMarkPnt[0].Y, _rMarkPnt[1].X, _rMarkPnt[1].Y); // upper shadow
                 e.Graphics.DrawLine(penShadowDark, _rMarkPnt[0].X, _rMarkPnt[0].Y + 1, _rMarkPnt[3].X, _rMarkPnt[3].Y); // Right shadow
-                if (_activeMark == ActiveMarkType.Right)
-                {
-                    e.Graphics.DrawLine(penShadowLight, _pixelPosR + _markWidth / 2 - 1, markyoff + _markHeight / 3, _pixelPosR + _markWidth / 2 - 1, markyoff + 2 * _markHeight / 3); // active mark
-                    e.Graphics.DrawLine(penShadowDark, _pixelPosR + _markWidth / 2, markyoff + _markHeight / 3, _pixelPosR + _markWidth / 2, markyoff + 2 * _markHeight / 3); // active mark				
-                }
+
+                e.Graphics.DrawLine(penShadowLight, _pixelPosR, markyoff + _markHeight, _pixelPosR, markyoff + _markHeight); // active mark
+                e.Graphics.DrawLine(penShadowDark, _pixelPosR, markyoff + _markHeight / 3, _pixelPosR, markyoff + 2 * _markHeight / 3); // active mark				
 
                 if (_moveLMark)
                 {
@@ -460,40 +456,36 @@ namespace DoubleTrackBar
                 }
 
                 // Left(upper) mark knob				
-                _lMarkPnt[0].Y = _pixelPosL - _markWidth; _lMarkPnt[0].X = markyoff + _markHeight / 3;
-                _lMarkPnt[1].Y = _pixelPosL; _lMarkPnt[1].X = markyoff;
-                _lMarkPnt[2].Y = _pixelPosL; _lMarkPnt[2].X = markyoff + _markHeight;
-                _lMarkPnt[3].Y = _pixelPosL - _markWidth; _lMarkPnt[3].X = markyoff + 2 * _markHeight / 3;
+                _lMarkPnt[0].Y = _pixelPosL - _markWidth / 2; _lMarkPnt[0].X = markyoff + _markHeight / 50;
+                _lMarkPnt[1].Y = _pixelPosL + _markWidth / 2; _lMarkPnt[1].X = markyoff;
+                _lMarkPnt[2].Y = _pixelPosL + _markWidth / 2; _lMarkPnt[2].X = markyoff + _markHeight;
+                _lMarkPnt[3].Y = _pixelPosL - _markWidth / 2; _lMarkPnt[3].X = markyoff + _markHeight;
                 _lMarkPnt[4].Y = _pixelPosL - _markWidth; _lMarkPnt[4].X = markyoff;
                 e.Graphics.FillPolygon(brushRange, _lMarkPnt);
-                e.Graphics.DrawLine(penShadowDark, _lMarkPnt[3].X, _lMarkPnt[3].Y, _lMarkPnt[2].X, _lMarkPnt[2].Y); // Right shadow
+                e.Graphics.DrawLine(penShadowDark, _lMarkPnt[3].X - 1, _lMarkPnt[3].Y, _lMarkPnt[2].X - 1, _lMarkPnt[2].Y); // Right shadow
                 e.Graphics.DrawLine(penShadowLight, _lMarkPnt[0].X - 1, _lMarkPnt[0].Y, _lMarkPnt[3].X - 1, _lMarkPnt[3].Y); // Top shadow				
                 e.Graphics.DrawLine(penShadowLight, _lMarkPnt[0].X - 1, _lMarkPnt[0].Y, _lMarkPnt[1].X - 1, _lMarkPnt[1].Y); // Left shadow
                 if (_pixelPosL < _pixelPosR)
                     e.Graphics.DrawLine(penShadowDark, _lMarkPnt[1].X, _lMarkPnt[1].Y, _lMarkPnt[2].X, _lMarkPnt[2].Y); // lower shadow
-                if (_activeMark == ActiveMarkType.Left)
-                {
-                    e.Graphics.DrawLine(penShadowLight, markyoff + _markHeight / 3, _pixelPosL - _markWidth / 2, markyoff + 2 * _markHeight / 3, _pixelPosL - _markWidth / 2); // active mark
-                    e.Graphics.DrawLine(penShadowDark, markyoff + _markHeight / 3, _pixelPosL - _markWidth / 2 + 1, markyoff + 2 * _markHeight / 3, _pixelPosL - _markWidth / 2 + 1); // active mark			
-                }
+
+                e.Graphics.DrawLine(penShadowLight, markyoff + _markHeight / 3, _pixelPosL, markyoff + 2 * _markHeight / 3, _pixelPosL); // active mark
+                e.Graphics.DrawLine(penShadowDark, markyoff + _markHeight / 3, _pixelPosL, markyoff + 2 * _markHeight / 3, _pixelPosL); // active mark			
 
                 // Right mark knob
-                _rMarkPnt[0].Y = _pixelPosR + _markWidth; _rMarkPnt[0].X = markyoff + _markHeight / 3;
-                _rMarkPnt[1].Y = _pixelPosR; _rMarkPnt[1].X = markyoff;
-                _rMarkPnt[2].Y = _pixelPosR; _rMarkPnt[2].X = markyoff + _markHeight;
-                _rMarkPnt[3].Y = _pixelPosR + _markWidth; _rMarkPnt[3].X = markyoff + 2 * _markHeight / 3;
+                _rMarkPnt[0].Y = _pixelPosR + _markWidth / 2; _rMarkPnt[0].X = markyoff + _markHeight / 50;
+                _rMarkPnt[1].Y = _pixelPosR - _markWidth / 2; _rMarkPnt[1].X = markyoff;
+                _rMarkPnt[2].Y = _pixelPosR - _markWidth / 2; _rMarkPnt[2].X = markyoff + _markHeight;
+                _rMarkPnt[3].Y = _pixelPosR + _markWidth / 2; _rMarkPnt[3].X = markyoff + _markHeight;
                 _rMarkPnt[4].Y = _pixelPosR + _markWidth; _rMarkPnt[4].X = markyoff;
                 e.Graphics.FillPolygon(brushRange, _rMarkPnt);
                 e.Graphics.DrawLine(penShadowDark, _rMarkPnt[2].X, _rMarkPnt[2].Y, _rMarkPnt[3].X, _rMarkPnt[3].Y); // lower Right shadow
-                e.Graphics.DrawLine(penShadowDark, _rMarkPnt[0].X, _rMarkPnt[0].Y, _rMarkPnt[1].X, _rMarkPnt[1].Y); // upper shadow
+                e.Graphics.DrawLine(penShadowLight, _rMarkPnt[0].X, _rMarkPnt[0].Y, _rMarkPnt[1].X, _rMarkPnt[1].Y); // upper shadow
                 e.Graphics.DrawLine(penShadowDark, _rMarkPnt[0].X, _rMarkPnt[0].Y, _rMarkPnt[3].X, _rMarkPnt[3].Y); // Right shadow
                 if (_pixelPosL < _pixelPosR)
                     e.Graphics.DrawLine(penShadowLight, _rMarkPnt[1].X, _rMarkPnt[1].Y, _rMarkPnt[2].X, _rMarkPnt[2].Y); // Left shadow
-                if (_activeMark == ActiveMarkType.Right)
-                {
-                    e.Graphics.DrawLine(penShadowLight, markyoff + _markHeight / 3, _pixelPosR + _markWidth / 2 - 1, markyoff + 2 * _markHeight / 3, _pixelPosR + _markWidth / 2 - 1); // active mark
-                    e.Graphics.DrawLine(penShadowDark, markyoff + _markHeight / 3, _pixelPosR + _markWidth / 2, markyoff + 2 * _markHeight / 3, _pixelPosR + _markWidth / 2); // active mark				
-                }
+
+                e.Graphics.DrawLine(penShadowLight, markyoff + _markHeight / 3, _pixelPosR, markyoff + 2 * _markHeight / 3, _pixelPosR); // active mark
+                e.Graphics.DrawLine(penShadowDark, markyoff + _markHeight / 3, _pixelPosR, markyoff + 2 * _markHeight / 3, _pixelPosR); // active mark				
 
                 if (_moveLMark)
                 {
