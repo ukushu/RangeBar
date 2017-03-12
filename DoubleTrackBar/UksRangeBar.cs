@@ -381,26 +381,9 @@ namespace DoubleTrackBar
                 e.Graphics.DrawLine(penShadowLight, _pixelPosR, markyoff + _markHeight, _pixelPosR, markyoff + _markHeight); // active mark
                 e.Graphics.DrawLine(penShadowDark, _pixelPosR, markyoff + _markHeight / 3, _pixelPosR, markyoff + 2 * _markHeight / 3); // active mark				
 
-                if (_moveLMark)
-                {
-                    Font fontMark = new Font("Arial", _markWidth);
-                    SolidBrush brushMark = new SolidBrush(_colorShadowDark);
-                    StringFormat strformat = new StringFormat();
-                    strformat.Alignment = StringAlignment.Center;
-                    strformat.LineAlignment = StringAlignment.Near;
-                    e.Graphics.DrawString(_rangeMin.ToString(), fontMark, brushMark, _pixelPosL, tickyoff1 + _tickHeight, strformat);
-                }
 
-                if (_moveRMark)
-                {
-                    Font fontMark = new Font("Arial", _markWidth);
-                    SolidBrush brushMark = new SolidBrush(_colorShadowDark);
-                    StringFormat strformat = new StringFormat();
-                    strformat.Alignment = StringAlignment.Center;
-                    strformat.LineAlignment = StringAlignment.Near;
-                    e.Graphics.DrawString(_rangeMax.ToString(), fontMark, brushMark, _pixelPosR, tickyoff1 + _tickHeight, strformat);
-                }
 
+                ShowTextOfCurrPosition(e, tickyoff1);
             }
             else // Vertical bar
             {
@@ -487,27 +470,52 @@ namespace DoubleTrackBar
                 e.Graphics.DrawLine(penShadowLight, markyoff + _markHeight / 3, _pixelPosR, markyoff + 2 * _markHeight / 3, _pixelPosR); // active mark
                 e.Graphics.DrawLine(penShadowDark, markyoff + _markHeight / 3, _pixelPosR, markyoff + 2 * _markHeight / 3, _pixelPosR); // active mark				
 
-                if (_moveLMark)
-                {
-                    Font fontMark = new Font("Arial", _markWidth);
-                    SolidBrush brushMark = new SolidBrush(_colorShadowDark);
-                    StringFormat strformat = new StringFormat();
-                    strformat.Alignment = StringAlignment.Near;
-                    strformat.LineAlignment = StringAlignment.Center;
-                    e.Graphics.DrawString(_rangeMin.ToString(), fontMark, brushMark, tickyoff1 + _tickHeight + 2, _pixelPosL, strformat);
-                }
 
-                if (_moveRMark)
+                ShowTextOfCurrPosition(e, tickyoff1);
+            }
+        }
+
+
+
+        private void ShowTextOfCurrPosition(PaintEventArgs e, int tickOffset)
+        {
+            Font fontMark = new Font("Arial", _markWidth);
+            SolidBrush brushMark = new SolidBrush(_colorShadowDark);
+            StringFormat strformat = new StringFormat();
+
+            if (_moveLMark)
+            {
+                if (_orientationBar == RangeBarOrientation.Horizontal)
                 {
-                    Font fontMark = new Font("Arial", _markWidth);
-                    SolidBrush brushMark = new SolidBrush(_colorShadowDark);
-                    StringFormat strformat = new StringFormat();
+                    strformat.Alignment = StringAlignment.Center;
+                    strformat.LineAlignment = StringAlignment.Near;
+                    e.Graphics.DrawString(_rangeMin.ToString(), fontMark, brushMark, _pixelPosL, tickOffset + _tickHeight, strformat);
+                }
+                else
+                {
                     strformat.Alignment = StringAlignment.Near;
                     strformat.LineAlignment = StringAlignment.Center;
-                    e.Graphics.DrawString(_rangeMax.ToString(), fontMark, brushMark, tickyoff1 + _tickHeight, _pixelPosR, strformat);
+                    e.Graphics.DrawString(_rangeMin.ToString(), fontMark, brushMark, tickOffset + _tickHeight + 2, _pixelPosL, strformat);
+                }
+            }
+
+            if (_moveRMark)
+            {
+                if (_orientationBar == RangeBarOrientation.Horizontal)
+                {
+                    strformat.Alignment = StringAlignment.Center;
+                    strformat.LineAlignment = StringAlignment.Near;
+                    e.Graphics.DrawString(_rangeMax.ToString(), fontMark, brushMark, _pixelPosR, tickOffset + _tickHeight, strformat);
+                }
+                else
+                {
+                    strformat.Alignment = StringAlignment.Near;
+                    strformat.LineAlignment = StringAlignment.Center;
+                    e.Graphics.DrawString(_rangeMax.ToString(), fontMark, brushMark, tickOffset + _tickHeight, _pixelPosR, strformat);
                 }
             }
         }
+
 
         private void OnMouseDown(object sender, MouseEventArgs e)
         {
