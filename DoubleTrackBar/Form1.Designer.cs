@@ -65,14 +65,14 @@
             this.uksRangeBar2.RangeMaximum = 5;
             this.uksRangeBar2.RangeMinimum = 3;
             this.uksRangeBar2.ScaleOrientation = DoubleTrackBar.UksRangeBar.TopBottomOrientation.Bottom;
-            this.uksRangeBar2.Size = new System.Drawing.Size(45, 252);
+            this.uksRangeBar2.Size = new System.Drawing.Size(77, 252);
             this.uksRangeBar2.TabIndex = 2;
             this.uksRangeBar2.TotalMaximum = 100;
             this.uksRangeBar2.TotalMinimum = 0;
             // 
             // uksRangeBar1
             // 
-            this.uksRangeBar1.DivisionNum = 100;
+            this.uksRangeBar1.DivisionNum = 10;
             this.uksRangeBar1.HeightOfBar = 8;
             this.uksRangeBar1.HeightOfMark = 24;
             this.uksRangeBar1.HeightOfTick = 6;
@@ -85,7 +85,7 @@
             this.uksRangeBar1.ScaleOrientation = DoubleTrackBar.UksRangeBar.TopBottomOrientation.Bottom;
             this.uksRangeBar1.Size = new System.Drawing.Size(449, 67);
             this.uksRangeBar1.TabIndex = 1;
-            this.uksRangeBar1.TotalMaximum = 100;
+            this.uksRangeBar1.TotalMaximum = 10;
             this.uksRangeBar1.TotalMinimum = 0;
             // 
             // zzzzRangeBarOriginal1
@@ -110,7 +110,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(579, 296);
+            this.ClientSize = new System.Drawing.Size(621, 296);
             this.Controls.Add(this.zzzzRangeBarOriginal2);
             this.Controls.Add(this.uksRangeBar2);
             this.Controls.Add(this.uksRangeBar1);

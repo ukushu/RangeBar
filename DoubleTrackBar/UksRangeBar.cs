@@ -4,6 +4,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -80,8 +81,8 @@ namespace DoubleTrackBar
         private int _pixelPosL, _pixelPosR;
         private int _xPosMin, _xPosMax;
 
-        private Point[] _lMarkPnt = new Point[5];
-        private Point[] _rMarkPnt = new Point[5];
+        private Point[] _lMarkPnt = new Point[4];
+        private Point[] _rMarkPnt = new Point[4];
 
         private bool _moveLMark = false;
         private bool _moveRMark = false;
@@ -260,17 +261,18 @@ namespace DoubleTrackBar
             int h = Height;
             int w = Width;
 
-            int baryoff, markyoff, tickyoff1, tickyoff2;
+            int barOffset, markOffset, tickyoff1, tickyoff2;
             
-            double dtick;
+            double deltaTick;
             
             int tickpos;
             
             Pen penShadowLight = new Pen(_colorShadowLight);
             Pen penShadowDark = new Pen(_colorShadowDark);
-            
+  
             SolidBrush brushShadowLight = new SolidBrush(_colorShadowLight);
             SolidBrush brushShadowDark = new SolidBrush(_colorShadowDark);
+
             SolidBrush brushInner;
             SolidBrush brushRange = new SolidBrush(_colorRange);
 
@@ -281,10 +283,7 @@ namespace DoubleTrackBar
 
             // range
             _xPosMin = _markWidth + 1;
-            if (_orientationBar == RangeBarOrientation.Horizontal)
-                _xPosMax = w - _markWidth - 1;
-            else
-                _xPosMax = h - _markWidth - 1;
+            _xPosMax = (_orientationBar == RangeBarOrientation.Horizontal) ?(w - _markWidth - 1)  : (h - _markWidth - 1);
 
             // range check
             if (_pixelPosL < _xPosMin) _pixelPosL = _xPosMin;
@@ -294,42 +293,41 @@ namespace DoubleTrackBar
 
             RangePos2PixelPos();
 
-
             if (_orientationBar == RangeBarOrientation.Horizontal)
             {
-                baryoff = (h - _barHeight) / 2;
-                markyoff = baryoff + (_barHeight - _markHeight) / 2 - 1;
+                barOffset = (h - _barHeight) / 2;
+                markOffset = barOffset + (_barHeight - _markHeight) / 2 - 1;
 
                 // total range bar frame			
-                e.Graphics.FillRectangle(brushShadowDark, 0, baryoff, w - 1, sizeShadow);	// Top
-                e.Graphics.FillRectangle(brushShadowDark, 0, baryoff, sizeShadow, _barHeight - 1);	// Left
-                e.Graphics.FillRectangle(brushShadowLight, 0, baryoff + _barHeight - 1 - sizeShadow, w - 1, sizeShadow);	// Bottom
-                e.Graphics.FillRectangle(brushShadowLight, w - 1 - sizeShadow, baryoff, sizeShadow, _barHeight - 1);	// Right
+                e.Graphics.FillRectangle(brushShadowDark, 0, barOffset, w - 1, sizeShadow);	// Top
+                e.Graphics.FillRectangle(brushShadowDark, 0, barOffset, sizeShadow, _barHeight - 1);	// Left
+                e.Graphics.FillRectangle(brushShadowLight, 0, barOffset + _barHeight - 1 - sizeShadow, w - 1, sizeShadow);	// Bottom
+                e.Graphics.FillRectangle(brushShadowLight, w - 1 - sizeShadow, barOffset, sizeShadow, _barHeight - 1);	// Right
 
                 // inner region
-                e.Graphics.FillRectangle(brushInner, _pixelPosL, baryoff + sizeShadow, _pixelPosR - _pixelPosL, _barHeight - 1 - 2 * sizeShadow);
+                e.Graphics.FillRectangle(brushInner, _pixelPosL, barOffset + sizeShadow, _pixelPosR - _pixelPosL, _barHeight - 1 - 2 * sizeShadow);
 
                 // Skala
                 if (_orientationScale == TopBottomOrientation.Bottom)
                 {
-                    tickyoff1 = tickyoff2 = baryoff + _barHeight + 2;
+                    tickyoff1 = tickyoff2 = barOffset + _barHeight + 2;
                 }
                 else if (_orientationScale == TopBottomOrientation.Top)
                 {
-                    tickyoff1 = tickyoff2 = baryoff - _tickHeight - 4;
+                    tickyoff1 = tickyoff2 = barOffset - _tickHeight - 4;
                 }
                 else
                 {
-                    tickyoff1 = baryoff + _barHeight + 2;
-                    tickyoff2 = baryoff - _tickHeight - 4;
+                    tickyoff1 = barOffset + _barHeight + 2;
+                    tickyoff2 = barOffset - _tickHeight - 4;
                 }
 
                 if (_numAxisDivision > 1)
                 {
-                    dtick = (double)(_xPosMax - _xPosMin) / _numAxisDivision;
+                    deltaTick = (double)(_xPosMax - _xPosMin) / _numAxisDivision;
                     for (int i = 0; i < _numAxisDivision + 1; i++)
                     {
-                        tickpos = (int)Math.Round(i * dtick);
+                        tickpos = (int)Math.Round(i * deltaTick);
                         if (_orientationScale == TopBottomOrientation.Bottom
                             || _orientationScale == TopBottomOrientation.Both)
                         {
@@ -349,76 +347,48 @@ namespace DoubleTrackBar
                     }
                 }
 
-                // Left mark knob			
-                _lMarkPnt[0].X = _pixelPosL - _markWidth / 2; _lMarkPnt[0].Y = markyoff + _markHeight / 50;
-                _lMarkPnt[1].X = _pixelPosL + _markWidth / 2; _lMarkPnt[1].Y = markyoff;
-                _lMarkPnt[2].X = _pixelPosL + _markWidth / 2; _lMarkPnt[2].Y = markyoff + _markHeight;
-                _lMarkPnt[3].X = _pixelPosL - _markWidth / 2; _lMarkPnt[3].Y = markyoff + _markHeight;
-                _lMarkPnt[4].X = _pixelPosL - _markWidth; _lMarkPnt[4].Y = markyoff;
-                e.Graphics.FillPolygon(brushRange, _lMarkPnt);
-                e.Graphics.DrawLine(penShadowDark, _lMarkPnt[3].X - 1, _lMarkPnt[3].Y, _lMarkPnt[1].X - 1, _lMarkPnt[2].Y); // lower Left shadow
-                e.Graphics.DrawLine(penShadowLight, _lMarkPnt[0].X - 1, _lMarkPnt[0].Y, _lMarkPnt[0].X - 1, _lMarkPnt[3].Y); // Left shadow				
-                e.Graphics.DrawLine(penShadowLight, _lMarkPnt[0].X - 1, _lMarkPnt[0].Y, _lMarkPnt[1].X - 1, _lMarkPnt[1].Y); // upper shadow
-                if (_pixelPosL < _pixelPosR)
-                    e.Graphics.DrawLine(penShadowDark, _lMarkPnt[1].X, _lMarkPnt[1].Y + 1, _lMarkPnt[1].X, _lMarkPnt[2].Y); // Right shadow
-
-                e.Graphics.DrawLine(penShadowLight, _pixelPosL, markyoff + _markHeight, _pixelPosL, markyoff +_markHeight); // active mark
-                e.Graphics.DrawLine(penShadowDark, _pixelPosL, markyoff + _markHeight / 3, _pixelPosL, markyoff + 2 * _markHeight / 3); // active mark			
-
-                // Right mark knob
-                _rMarkPnt[0].X = _pixelPosR + _markWidth / 2; _rMarkPnt[0].Y = markyoff + _markHeight / 50;
-                _rMarkPnt[1].X = _pixelPosR - _markWidth / 2; _rMarkPnt[1].Y = markyoff;
-                _rMarkPnt[2].X = _pixelPosR - _markWidth / 2; _rMarkPnt[2].Y = markyoff + _markHeight;
-                _rMarkPnt[3].X = _pixelPosR + _markWidth / 2; _rMarkPnt[3].Y = markyoff + _markHeight;
-                _rMarkPnt[4].X = _pixelPosR + _markWidth; _rMarkPnt[4].Y = markyoff;
-                e.Graphics.FillPolygon(brushRange, _rMarkPnt);
-                if (_pixelPosL < _pixelPosR)
-                    e.Graphics.DrawLine(penShadowLight, _rMarkPnt[1].X - 1, _rMarkPnt[1].Y + 1, _rMarkPnt[2].X - 1, _rMarkPnt[2].Y); // Left shadow
-                e.Graphics.DrawLine(penShadowDark, _rMarkPnt[2].X, _rMarkPnt[2].Y, _rMarkPnt[3].X, _rMarkPnt[3].Y); // lower Right shadow
-                e.Graphics.DrawLine(penShadowLight, _rMarkPnt[0].X, _rMarkPnt[0].Y, _rMarkPnt[1].X, _rMarkPnt[1].Y); // upper shadow
-                e.Graphics.DrawLine(penShadowDark, _rMarkPnt[0].X, _rMarkPnt[0].Y + 1, _rMarkPnt[3].X, _rMarkPnt[3].Y); // Right shadow
-
-                e.Graphics.DrawLine(penShadowLight, _pixelPosR, markyoff + _markHeight, _pixelPosR, markyoff + _markHeight); // active mark
-                e.Graphics.DrawLine(penShadowDark, _pixelPosR, markyoff + _markHeight / 3, _pixelPosR, markyoff + 2 * _markHeight / 3); // active mark				
-
-
+                RecalcKnobsPos(markOffset, ref _lMarkPnt, _pixelPosL);
+                RecalcKnobsPos(markOffset, ref _rMarkPnt, _pixelPosR);
+                
+                PaintKnob(e, _lMarkPnt, _pixelPosL, brushRange, penShadowLight, penShadowDark, markOffset);
+                PaintKnob(e, _rMarkPnt, _pixelPosR, brushRange, penShadowLight, penShadowDark, markOffset);
 
                 ShowTextOfCurrPosition(e, tickyoff1);
             }
             else // Vertical bar
             {
-                baryoff = (w + _barHeight) / 2;
-                markyoff = baryoff - _barHeight / 2 - _markHeight / 2;
+                barOffset = (w + _barHeight) / 2;
+                markOffset = barOffset - _barHeight / 2 - _markHeight / 2;
                 if (_orientationScale == TopBottomOrientation.Bottom)
                 {
-                    tickyoff1 = tickyoff2 = baryoff + 2;
+                    tickyoff1 = tickyoff2 = barOffset + 2;
                 }
                 else if (_orientationScale == TopBottomOrientation.Top)
                 {
-                    tickyoff1 = tickyoff2 = baryoff - _barHeight - 2 - _tickHeight;
+                    tickyoff1 = tickyoff2 = barOffset - _barHeight - 2 - _tickHeight;
                 }
                 else
                 {
-                    tickyoff1 = baryoff + 2;
-                    tickyoff2 = baryoff - _barHeight - 2 - _tickHeight;
+                    tickyoff1 = barOffset + 2;
+                    tickyoff2 = barOffset - _barHeight - 2 - _tickHeight;
                 }
 
                 // total range bar frame			
-                e.Graphics.FillRectangle(brushShadowDark, baryoff - _barHeight, 0, _barHeight, sizeShadow);	// Top
-                e.Graphics.FillRectangle(brushShadowDark, baryoff - _barHeight, 0, sizeShadow, h - 1);	// Left				
-                e.Graphics.FillRectangle(brushShadowLight, baryoff, 0, sizeShadow, h - 1);	// Right
-                e.Graphics.FillRectangle(brushShadowLight, baryoff - _barHeight, h - sizeShadow, _barHeight, sizeShadow);	// Bottom
+                e.Graphics.FillRectangle(brushShadowDark, barOffset - _barHeight, 0, _barHeight, sizeShadow);	// Top
+                e.Graphics.FillRectangle(brushShadowDark, barOffset - _barHeight, 0, sizeShadow, h - 1);	// Left				
+                e.Graphics.FillRectangle(brushShadowLight, barOffset, 0, sizeShadow, h - 1);	// Right
+                e.Graphics.FillRectangle(brushShadowLight, barOffset - _barHeight, h - sizeShadow, _barHeight, sizeShadow);	// Bottom
 
                 // inner region
-                e.Graphics.FillRectangle(brushInner, baryoff - _barHeight + sizeShadow, _pixelPosL, _barHeight - 2 * sizeShadow, _pixelPosR - _pixelPosL);
+                e.Graphics.FillRectangle(brushInner, barOffset - _barHeight + sizeShadow, _pixelPosL, _barHeight - 2 * sizeShadow, _pixelPosR - _pixelPosL);
 
                 // Skala
                 if (_numAxisDivision > 1)
                 {
-                    dtick = (double)(_xPosMax - _xPosMin) / _numAxisDivision;
+                    deltaTick = (double)(_xPosMax - _xPosMin) / _numAxisDivision;
                     for (int i = 0; i < _numAxisDivision + 1; i++)
                     {
-                        tickpos = (int)Math.Round(i * dtick);
+                        tickpos = (int)Math.Round(i * deltaTick);
                         if (_orientationScale == TopBottomOrientation.Bottom || _orientationScale == TopBottomOrientation.Both)
                         {
                             e.Graphics.DrawLine(penShadowDark,
@@ -438,44 +408,76 @@ namespace DoubleTrackBar
                     }
                 }
 
-                // Left(upper) mark knob				
-                _lMarkPnt[0].Y = _pixelPosL - _markWidth / 2; _lMarkPnt[0].X = markyoff + _markHeight / 50;
-                _lMarkPnt[1].Y = _pixelPosL + _markWidth / 2; _lMarkPnt[1].X = markyoff;
-                _lMarkPnt[2].Y = _pixelPosL + _markWidth / 2; _lMarkPnt[2].X = markyoff + _markHeight;
-                _lMarkPnt[3].Y = _pixelPosL - _markWidth / 2; _lMarkPnt[3].X = markyoff + _markHeight;
-                _lMarkPnt[4].Y = _pixelPosL - _markWidth; _lMarkPnt[4].X = markyoff;
-                e.Graphics.FillPolygon(brushRange, _lMarkPnt);
-                e.Graphics.DrawLine(penShadowDark, _lMarkPnt[3].X - 1, _lMarkPnt[3].Y, _lMarkPnt[2].X - 1, _lMarkPnt[2].Y); // Right shadow
-                e.Graphics.DrawLine(penShadowLight, _lMarkPnt[0].X - 1, _lMarkPnt[0].Y, _lMarkPnt[3].X - 1, _lMarkPnt[3].Y); // Top shadow				
-                e.Graphics.DrawLine(penShadowLight, _lMarkPnt[0].X - 1, _lMarkPnt[0].Y, _lMarkPnt[1].X - 1, _lMarkPnt[1].Y); // Left shadow
-                if (_pixelPosL < _pixelPosR)
-                    e.Graphics.DrawLine(penShadowDark, _lMarkPnt[1].X, _lMarkPnt[1].Y, _lMarkPnt[2].X, _lMarkPnt[2].Y); // lower shadow
+                RecalcKnobsPos(markOffset, ref _lMarkPnt, _pixelPosL);
+                RecalcKnobsPos(markOffset, ref _rMarkPnt, _pixelPosR);
 
-                e.Graphics.DrawLine(penShadowLight, markyoff + _markHeight / 3, _pixelPosL, markyoff + 2 * _markHeight / 3, _pixelPosL); // active mark
-                e.Graphics.DrawLine(penShadowDark, markyoff + _markHeight / 3, _pixelPosL, markyoff + 2 * _markHeight / 3, _pixelPosL); // active mark			
-
-                // Right mark knob
-                _rMarkPnt[0].Y = _pixelPosR + _markWidth / 2; _rMarkPnt[0].X = markyoff + _markHeight / 50;
-                _rMarkPnt[1].Y = _pixelPosR - _markWidth / 2; _rMarkPnt[1].X = markyoff;
-                _rMarkPnt[2].Y = _pixelPosR - _markWidth / 2; _rMarkPnt[2].X = markyoff + _markHeight;
-                _rMarkPnt[3].Y = _pixelPosR + _markWidth / 2; _rMarkPnt[3].X = markyoff + _markHeight;
-                _rMarkPnt[4].Y = _pixelPosR + _markWidth; _rMarkPnt[4].X = markyoff;
-                e.Graphics.FillPolygon(brushRange, _rMarkPnt);
-                e.Graphics.DrawLine(penShadowDark, _rMarkPnt[2].X, _rMarkPnt[2].Y, _rMarkPnt[3].X, _rMarkPnt[3].Y); // lower Right shadow
-                e.Graphics.DrawLine(penShadowLight, _rMarkPnt[0].X, _rMarkPnt[0].Y, _rMarkPnt[1].X, _rMarkPnt[1].Y); // upper shadow
-                e.Graphics.DrawLine(penShadowDark, _rMarkPnt[0].X, _rMarkPnt[0].Y, _rMarkPnt[3].X, _rMarkPnt[3].Y); // Right shadow
-                if (_pixelPosL < _pixelPosR)
-                    e.Graphics.DrawLine(penShadowLight, _rMarkPnt[1].X, _rMarkPnt[1].Y, _rMarkPnt[2].X, _rMarkPnt[2].Y); // Left shadow
-
-                e.Graphics.DrawLine(penShadowLight, markyoff + _markHeight / 3, _pixelPosR, markyoff + 2 * _markHeight / 3, _pixelPosR); // active mark
-                e.Graphics.DrawLine(penShadowDark, markyoff + _markHeight / 3, _pixelPosR, markyoff + 2 * _markHeight / 3, _pixelPosR); // active mark				
-
+                PaintKnob(e, _lMarkPnt, _pixelPosL, brushRange, penShadowLight, penShadowDark, markOffset);
+                PaintKnob(e, _rMarkPnt, _pixelPosR, brushRange, penShadowLight, penShadowDark, markOffset);
 
                 ShowTextOfCurrPosition(e, tickyoff1);
             }
         }
 
+        private void RecalcKnobsPos(int markOffset, ref Point[] pos, int pixelPos)
+        {
+            int markWidth = (pos == _lMarkPnt) ? _markWidth : -_markWidth;
 
+            var offsetX = markWidth / 2;
+
+            pos[0].X = pixelPos - offsetX; pos[0].Y = markOffset + _markHeight / 50;
+            pos[1].X = pixelPos + offsetX; pos[1].Y = markOffset;
+            pos[2].X = pixelPos + offsetX; pos[2].Y = markOffset + _markHeight;
+            pos[3].X = pixelPos - offsetX; pos[3].Y = markOffset + _markHeight;
+
+            if (_orientationBar == RangeBarOrientation.Vertical)
+            {
+                for (int i = 0; i < pos.Length; i++)
+                {
+                    var tmp = pos[i].Y;
+                    pos[i].Y = pos[i].X;
+                    pos[i].X = tmp;
+                }
+            }
+
+            // Lame fix for the same positions of points in both L and R arrays
+            var posToDraw = new List<Point>();
+            if (pos == _rMarkPnt)
+            {
+                posToDraw.Add(pos[1]);
+                posToDraw.Add(pos[0]);
+                posToDraw.Add(pos[3]);
+                posToDraw.Add(pos[2]);
+
+                pos = posToDraw.ToArray();
+            }
+        }
+
+        private void PaintKnob(PaintEventArgs e, Point[] pos, int pixelPos, Brush brushRange, Pen penShadowLight, Pen penShadowDark, int markOffset)
+        {
+            e.Graphics.FillPolygon(brushRange, pos);
+
+            //Draw line in the middle of Knoob
+            if (_orientationBar == RangeBarOrientation.Horizontal)
+            {
+                e.Graphics.DrawLine(penShadowLight, pixelPos, markOffset + _markHeight, pixelPos,
+                    markOffset + _markHeight);
+                e.Graphics.DrawLine(penShadowDark, pixelPos, markOffset + _markHeight / 3, pixelPos,
+                    markOffset + 2 * _markHeight / 3);
+            }
+            else
+            {
+                e.Graphics.DrawLine(penShadowLight, markOffset + _markHeight / 3, pixelPos, 
+                    markOffset + 2 * _markHeight / 3, pixelPos);
+                e.Graphics.DrawLine(penShadowDark, markOffset + _markHeight / 3, pixelPos, 
+                    markOffset + 2 * _markHeight / 3, pixelPos);                
+            }
+
+
+            e.Graphics.DrawLine(penShadowLight, pos[0], pos[1]); // upper shadow
+            e.Graphics.DrawLine(penShadowDark, pos[1], pos[2]); // Right shadow
+            e.Graphics.DrawLine(penShadowDark, pos[2], pos[3]); // lower shadow
+            e.Graphics.DrawLine(penShadowLight, pos[3], pos[0]); // Left shadow
+        }
 
         private void ShowTextOfCurrPosition(PaintEventArgs e, int tickOffset)
         {
@@ -515,7 +517,6 @@ namespace DoubleTrackBar
                 }
             }
         }
-
 
         private void OnMouseDown(object sender, MouseEventArgs e)
         {
