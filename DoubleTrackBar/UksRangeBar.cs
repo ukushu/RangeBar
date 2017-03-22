@@ -28,7 +28,6 @@ namespace DoubleTrackBar
         {
             Name = "UksRangeBar";
             Size = new Size(344, 64);
-            KeyPress += OnKeyPress;
             Resize += OnResize;
             Load += OnLoad;
             SizeChanged += OnSizeChanged;
@@ -58,25 +57,26 @@ namespace DoubleTrackBar
         public enum RangeBarOrientation { Horizontal, Vertical };
         public enum TopBottomOrientation { Top, Bottom, Both };
 
+        public bool _highlightingNumbers = true;
+
         private Color _colorInner = Color.LightGreen;
         private Color _colorRange = Color.FromKnownColor(KnownColor.Control);
         private Color _colorShadowLight = Color.FromKnownColor(KnownColor.ControlLightLight);
         private Color _colorShadowDark = Color.FromKnownColor(KnownColor.ControlDarkDark);
         private int sizeShadow = 1;
         private double _minimum = 0;
-        private double _maximum = 10;
-        private double _rangeMin = 3;
-        private double _rangeMax = 5;
+        private double _maximum = 100;
+        private double _rangeMin = 0;
+        private double _rangeMax = 10;
         private ActiveMarkType _activeMark = ActiveMarkType.None;
-
 
         private RangeBarOrientation _orientationBar = RangeBarOrientation.Horizontal; // orientation of range bar
         private TopBottomOrientation _orientationScale = TopBottomOrientation.Bottom;
         private int _barHeight = 8;
         private int _markWidth = 8;
         private int _markHeight = 24;
-        private int _tickHeight = 6;
-        private int _numAxisDivision = 10;
+        private int _tickHeight = 9;
+        private int _numAxisDivision = 100;
 
         private int _pixelPosL, _pixelPosR;
         private int _xPosMin, _xPosMax;
@@ -86,7 +86,33 @@ namespace DoubleTrackBar
 
         private bool _moveLMark = false;
         private bool _moveRMark = false;
-        
+
+        private bool _valueShownOnKnobsMove;
+
+        private Bitmap _fieldImage;
+
+        public Bitmap FieldImage
+        {
+            set
+            {
+                _fieldImage = value;
+                Invalidate();
+                Update();
+            }
+            get { return _fieldImage; }
+        }
+
+        public bool ValueShownOnKnobsMove
+        {
+            set
+            {
+                _valueShownOnKnobsMove = value;
+                Invalidate();
+                Update();
+            }
+            get { return _valueShownOnKnobsMove; }
+        }
+
         public int HeightOfTick
         {
             set
@@ -100,6 +126,7 @@ namespace DoubleTrackBar
                 return _tickHeight;
             }
         }
+
         public int HeightOfMark
         {
             set
@@ -118,7 +145,7 @@ namespace DoubleTrackBar
         {
             set
             {
-                _barHeight = Math.Min(value, _markHeight - 2);
+                _barHeight = value;
                 Invalidate();
                 Update();
             }
@@ -126,7 +153,6 @@ namespace DoubleTrackBar
             {
                 return _barHeight;
             }
-
         }
 
         public RangeBarOrientation Orientation
@@ -207,6 +233,7 @@ namespace DoubleTrackBar
             get { return (int)_maximum; }
         }
 
+
         public int TotalMinimum
         {
             set
@@ -258,32 +285,13 @@ namespace DoubleTrackBar
 
         private void OnPaint(object sender, PaintEventArgs e)
         {
-            int h = Height;
-            int w = Width;
+            int barOffset, markOffset;
 
-            int barOffset, markOffset, tickyoff1, tickyoff2;
-            
-            double deltaTick;
-            
-            int tickpos;
-            
-            Pen penShadowLight = new Pen(_colorShadowLight);
-            Pen penShadowDark = new Pen(_colorShadowDark);
-  
-            SolidBrush brushShadowLight = new SolidBrush(_colorShadowLight);
-            SolidBrush brushShadowDark = new SolidBrush(_colorShadowDark);
-
-            SolidBrush brushInner;
-            SolidBrush brushRange = new SolidBrush(_colorRange);
-
-            if (Enabled)
-                brushInner = new SolidBrush(_colorInner);
-            else
-                brushInner = new SolidBrush(Color.FromKnownColor(KnownColor.InactiveCaption));
+            CalcOffsets(out barOffset, out markOffset);
 
             // range
             _xPosMin = _markWidth + 1;
-            _xPosMax = (_orientationBar == RangeBarOrientation.Horizontal) ?(w - _markWidth - 1)  : (h - _markWidth - 1);
+            _xPosMax = (_orientationBar == RangeBarOrientation.Horizontal) ? (Width - _markWidth - 1) : (Height - _markWidth - 1);
 
             // range check
             if (_pixelPosL < _xPosMin) _pixelPosL = _xPosMin;
@@ -293,21 +301,99 @@ namespace DoubleTrackBar
 
             RangePos2PixelPos();
 
+            DrawBarBackLine(e, barOffset);
+
+            DrawSelectedRegion(e, barOffset);
+
+            DrawSkala(e, barOffset);
+
+            RecalcKnobsPos(markOffset, ref _lMarkPnt, _pixelPosL);//do not combine this method calls
+            RecalcKnobsPos(markOffset, ref _rMarkPnt, _pixelPosR);
+
+            PaintKnob(e, _lMarkPnt, _pixelPosL, markOffset);//do not combine this method calls
+            PaintKnob(e, _rMarkPnt, _pixelPosR, markOffset);
+        }
+
+        private void CalcOffsets(out int barOffset, out int markOffset)
+        {
             if (_orientationBar == RangeBarOrientation.Horizontal)
             {
-                barOffset = (h - _barHeight) / 2;
+                barOffset = (Height - _barHeight) / 2;
                 markOffset = barOffset + (_barHeight - _markHeight) / 2 - 1;
+            }
+            else
+            {
+                barOffset = (Width + _barHeight) / 2;
+                markOffset = barOffset - _barHeight / 2 - _markHeight / 2;
+            }
+        }
 
-                // total range bar frame			
-                e.Graphics.FillRectangle(brushShadowDark, 0, barOffset, w - 1, sizeShadow);	// Top
-                e.Graphics.FillRectangle(brushShadowDark, 0, barOffset, sizeShadow, _barHeight - 1);	// Left
-                e.Graphics.FillRectangle(brushShadowLight, 0, barOffset + _barHeight - 1 - sizeShadow, w - 1, sizeShadow);	// Bottom
-                e.Graphics.FillRectangle(brushShadowLight, w - 1 - sizeShadow, barOffset, sizeShadow, _barHeight - 1);	// Right
+        private void DrawBarBackLine(PaintEventArgs e, int barOffset)
+        {
+            var magicOffset = 8;
 
-                // inner region
+            SolidBrush brushShadowLight = new SolidBrush(_colorShadowLight);
+            SolidBrush brushShadowDark = new SolidBrush(_colorShadowDark);
+
+            if (_orientationBar == RangeBarOrientation.Horizontal)
+            {
+                e.Graphics.FillRectangle(brushShadowDark, magicOffset, barOffset, Width - magicOffset * 2, sizeShadow);	// Top
+                e.Graphics.FillRectangle(brushShadowLight, Width - sizeShadow - magicOffset + 1, barOffset, sizeShadow, _barHeight - 1);	// Right//помилка по ходу десь тут
+                e.Graphics.FillRectangle(brushShadowLight, magicOffset, barOffset + _barHeight - 1 - sizeShadow, Width - magicOffset * 2, sizeShadow);	// Bottom
+                e.Graphics.FillRectangle(brushShadowDark, magicOffset, barOffset, sizeShadow, _barHeight - 1);	// Left
+
+                if (FieldImage != null)
+                {
+                    e.Graphics.DrawImage(FieldImage, magicOffset + 1, barOffset + 1, Width - magicOffset * 2 - 1, _barHeight - 3);
+                }
+            }
+            else
+            {
+                e.Graphics.FillRectangle(brushShadowDark, barOffset - _barHeight, magicOffset, _barHeight, sizeShadow);	// Top
+                e.Graphics.FillRectangle(brushShadowDark, barOffset - _barHeight, magicOffset, sizeShadow, Height - 2 * magicOffset);	// Left				
+                e.Graphics.FillRectangle(brushShadowLight, barOffset, magicOffset, sizeShadow, Height - 2 * magicOffset);	// Right
+                e.Graphics.FillRectangle(brushShadowLight, barOffset - _barHeight, Height - sizeShadow - magicOffset + 1, _barHeight - 1, sizeShadow);	// Bottom
+
+                if (FieldImage != null)
+                {
+                    e.Graphics.DrawImage(FieldImage, barOffset - _barHeight + 1, magicOffset + 1, _barHeight - 2, (Height - 2 * magicOffset) - 1);
+                }
+            }
+        }
+
+        private void DrawSelectedRegion(PaintEventArgs e, int barOffset)
+        {
+            SolidBrush brushInner;
+
+            if (Enabled)
+                brushInner = new SolidBrush(_colorInner);
+            else
+                brushInner = new SolidBrush(Color.FromKnownColor(KnownColor.InactiveCaption));
+
+
+            if (_orientationBar == RangeBarOrientation.Horizontal)
+            {
                 e.Graphics.FillRectangle(brushInner, _pixelPosL, barOffset + sizeShadow, _pixelPosR - _pixelPosL, _barHeight - 1 - 2 * sizeShadow);
 
-                // Skala
+            }
+            else
+            {
+                e.Graphics.FillRectangle(brushInner, barOffset - _barHeight + sizeShadow, _pixelPosL, _barHeight - 2 * sizeShadow, _pixelPosR - _pixelPosL);
+            }
+        }
+
+        private void DrawSkala(PaintEventArgs e, int barOffset)
+        {
+            int tickyoff1, tickyoff2;
+
+            double deltaTick;
+
+            int tickpos;
+
+            Pen penShadowDark = new Pen(_colorShadowDark);
+
+            if (_orientationBar == RangeBarOrientation.Horizontal)
+            {
                 if (_orientationScale == TopBottomOrientation.Bottom)
                 {
                     tickyoff1 = tickyoff2 = barOffset + _barHeight + 2;
@@ -347,18 +433,9 @@ namespace DoubleTrackBar
                     }
                 }
 
-                RecalcKnobsPos(markOffset, ref _lMarkPnt, _pixelPosL);
-                RecalcKnobsPos(markOffset, ref _rMarkPnt, _pixelPosR);
-                
-                PaintKnob(e, _lMarkPnt, _pixelPosL, brushRange, penShadowLight, penShadowDark, markOffset);
-                PaintKnob(e, _rMarkPnt, _pixelPosR, brushRange, penShadowLight, penShadowDark, markOffset);
-
-                ShowTextOfCurrPosition(e, tickyoff1);
             }
             else // Vertical bar
             {
-                barOffset = (w + _barHeight) / 2;
-                markOffset = barOffset - _barHeight / 2 - _markHeight / 2;
                 if (_orientationScale == TopBottomOrientation.Bottom)
                 {
                     tickyoff1 = tickyoff2 = barOffset + 2;
@@ -373,16 +450,6 @@ namespace DoubleTrackBar
                     tickyoff2 = barOffset - _barHeight - 2 - _tickHeight;
                 }
 
-                // total range bar frame			
-                e.Graphics.FillRectangle(brushShadowDark, barOffset - _barHeight, 0, _barHeight, sizeShadow);	// Top
-                e.Graphics.FillRectangle(brushShadowDark, barOffset - _barHeight, 0, sizeShadow, h - 1);	// Left				
-                e.Graphics.FillRectangle(brushShadowLight, barOffset, 0, sizeShadow, h - 1);	// Right
-                e.Graphics.FillRectangle(brushShadowLight, barOffset - _barHeight, h - sizeShadow, _barHeight, sizeShadow);	// Bottom
-
-                // inner region
-                e.Graphics.FillRectangle(brushInner, barOffset - _barHeight + sizeShadow, _pixelPosL, _barHeight - 2 * sizeShadow, _pixelPosR - _pixelPosL);
-
-                // Skala
                 if (_numAxisDivision > 1)
                 {
                     deltaTick = (double)(_xPosMax - _xPosMin) / _numAxisDivision;
@@ -407,15 +474,9 @@ namespace DoubleTrackBar
                         }
                     }
                 }
-
-                RecalcKnobsPos(markOffset, ref _lMarkPnt, _pixelPosL);
-                RecalcKnobsPos(markOffset, ref _rMarkPnt, _pixelPosR);
-
-                PaintKnob(e, _lMarkPnt, _pixelPosL, brushRange, penShadowLight, penShadowDark, markOffset);
-                PaintKnob(e, _rMarkPnt, _pixelPosR, brushRange, penShadowLight, penShadowDark, markOffset);
-
-                ShowTextOfCurrPosition(e, tickyoff1);
             }
+
+            ShowCurrPosValueIfNeeded(e, tickyoff1);
         }
 
         private void RecalcKnobsPos(int markOffset, ref Point[] pos, int pixelPos)
@@ -452,8 +513,13 @@ namespace DoubleTrackBar
             }
         }
 
-        private void PaintKnob(PaintEventArgs e, Point[] pos, int pixelPos, Brush brushRange, Pen penShadowLight, Pen penShadowDark, int markOffset)
+        private void PaintKnob(PaintEventArgs e, Point[] pos, int pixelPos, int markOffset)
         {
+            Pen penShadowLight = new Pen(_colorShadowLight);
+            Pen penShadowDark = new Pen(_colorShadowDark);
+
+            SolidBrush brushRange = new SolidBrush(_colorRange);
+
             e.Graphics.FillPolygon(brushRange, pos);
 
             //Draw line in the middle of Knoob
@@ -466,10 +532,10 @@ namespace DoubleTrackBar
             }
             else
             {
-                e.Graphics.DrawLine(penShadowLight, markOffset + _markHeight / 3, pixelPos, 
+                e.Graphics.DrawLine(penShadowLight, markOffset + _markHeight / 3, pixelPos,
                     markOffset + 2 * _markHeight / 3, pixelPos);
-                e.Graphics.DrawLine(penShadowDark, markOffset + _markHeight / 3, pixelPos, 
-                    markOffset + 2 * _markHeight / 3, pixelPos);                
+                e.Graphics.DrawLine(penShadowDark, markOffset + _markHeight / 3, pixelPos,
+                    markOffset + 2 * _markHeight / 3, pixelPos);
             }
 
 
@@ -479,10 +545,14 @@ namespace DoubleTrackBar
             e.Graphics.DrawLine(penShadowLight, pos[3], pos[0]); // Left shadow
         }
 
-        private void ShowTextOfCurrPosition(PaintEventArgs e, int tickOffset)
+        private void ShowCurrPosValueIfNeeded(PaintEventArgs e, int tickOffset)
         {
+            if (ValueShownOnKnobsMove == false)
+                return;
+
             Font fontMark = new Font("Arial", _markWidth);
             SolidBrush brushMark = new SolidBrush(_colorShadowDark);
+
             StringFormat strformat = new StringFormat();
 
             if (_moveLMark)
@@ -491,12 +561,15 @@ namespace DoubleTrackBar
                 {
                     strformat.Alignment = StringAlignment.Center;
                     strformat.LineAlignment = StringAlignment.Near;
+
                     e.Graphics.DrawString(_rangeMin.ToString(), fontMark, brushMark, _pixelPosL, tickOffset + _tickHeight, strformat);
                 }
                 else
                 {
+
                     strformat.Alignment = StringAlignment.Near;
                     strformat.LineAlignment = StringAlignment.Center;
+
                     e.Graphics.DrawString(_rangeMin.ToString(), fontMark, brushMark, tickOffset + _tickHeight + 2, _pixelPosL, strformat);
                 }
             }
@@ -507,12 +580,14 @@ namespace DoubleTrackBar
                 {
                     strformat.Alignment = StringAlignment.Center;
                     strformat.LineAlignment = StringAlignment.Near;
+
                     e.Graphics.DrawString(_rangeMax.ToString(), fontMark, brushMark, _pixelPosR, tickOffset + _tickHeight, strformat);
                 }
                 else
                 {
                     strformat.Alignment = StringAlignment.Near;
                     strformat.LineAlignment = StringAlignment.Center;
+
                     e.Graphics.DrawString(_rangeMax.ToString(), fontMark, brushMark, tickOffset + _tickHeight, _pixelPosR, strformat);
                 }
             }
@@ -540,8 +615,7 @@ namespace DoubleTrackBar
                     _activeMark = ActiveMarkType.Left;
                     Invalidate(true);
                 }
-
-                if (rMarkRect.Contains(e.X, e.Y))
+                else if (rMarkRect.Contains(e.X, e.Y))
                 {
                     Capture = true;
                     _moveRMark = true;
@@ -583,29 +657,26 @@ namespace DoubleTrackBar
 
                 if (lMarkRect.Contains(e.X, e.Y) || rMarkRect.Contains(e.X, e.Y))
                 {
-                    if (_orientationBar == RangeBarOrientation.Horizontal)
-                        Cursor = Cursors.SizeWE;
-                    else
-                        Cursor = Cursors.SizeNS;
+                    Cursor = (_orientationBar == RangeBarOrientation.Horizontal) ? Cursors.SizeWE : Cursors.SizeNS;
                 }
-                else Cursor = Cursors.Arrow;
+                else
+                {
+                    Cursor = Cursors.Arrow;
+                }
 
                 if (_moveLMark)
                 {
-                    if (_orientationBar == RangeBarOrientation.Horizontal)
-                        Cursor = Cursors.SizeWE;
-                    else
-                        Cursor = Cursors.SizeNS;
-                    if (_orientationBar == RangeBarOrientation.Horizontal)
-                        _pixelPosL = e.X;
-                    else
-                        _pixelPosL = e.Y;
+                    Cursor = (_orientationBar == RangeBarOrientation.Horizontal) ? Cursors.SizeWE : Cursors.SizeNS;
+
+                    _pixelPosL = (_orientationBar == RangeBarOrientation.Horizontal) ? e.X : e.Y;
+                    
                     if (_pixelPosL < _xPosMin)
-                        _pixelPosL = _xPosMin;
+                        _pixelPosL = _xPosMin;                   
                     if (_pixelPosL > _xPosMax)
-                        _pixelPosL = _xPosMax;
+                        _pixelPosL = _xPosMax;                   
                     if (_pixelPosR < _pixelPosL)
                         _pixelPosR = _pixelPosL;
+                    
                     PixelPos2RangePos();
                     _activeMark = ActiveMarkType.Left;
                     Invalidate(true);
@@ -614,20 +685,17 @@ namespace DoubleTrackBar
                 }
                 else if (_moveRMark)
                 {
-                    if (_orientationBar == RangeBarOrientation.Horizontal)
-                        Cursor = Cursors.SizeWE;
-                    else
-                        Cursor = Cursors.SizeNS;
-                    if (_orientationBar == RangeBarOrientation.Horizontal)
-                        _pixelPosR = e.X;
-                    else
-                        _pixelPosR = e.Y;
-                    if (_pixelPosR > _xPosMax)
-                        _pixelPosR = _xPosMax;
+                    Cursor = (_orientationBar == RangeBarOrientation.Horizontal) ? Cursors.SizeWE : Cursors.SizeNS;
+
+                    _pixelPosR = (_orientationBar == RangeBarOrientation.Horizontal) ? e.X : e.Y;
+                    
                     if (_pixelPosR < _xPosMin)
-                        _pixelPosR = _xPosMin;
+                        _pixelPosR = _xPosMin;                                      
+                    if (_pixelPosR > _xPosMax)
+                        _pixelPosR = _xPosMax;                    
                     if (_pixelPosL > _pixelPosR)
                         _pixelPosL = _pixelPosR;
+                    
                     PixelPos2RangePos();
                     _activeMark = ActiveMarkType.Right;
                     Invalidate(true);
@@ -642,10 +710,8 @@ namespace DoubleTrackBar
             int w;
             int posw;
 
-            if (_orientationBar == RangeBarOrientation.Horizontal)
-                w = Width;
-            else
-                w = Height;
+            w = (_orientationBar == RangeBarOrientation.Horizontal) ? Width : Height;
+            
             posw = w - 2 * _markWidth - 2;
 
             _rangeMin = _minimum + (int)Math.Round((_maximum - _minimum) * (_pixelPosL - _xPosMin) / posw);
@@ -656,11 +722,9 @@ namespace DoubleTrackBar
         {
             int w;
             int posw;
+            
+            w = (_orientationBar == RangeBarOrientation.Horizontal) ? Width : Height;
 
-            if (_orientationBar == RangeBarOrientation.Horizontal)
-                w = Width;
-            else
-                w = Height;
             posw = w - 2 * _markWidth - 2;
 
             _pixelPosL = _xPosMin + (int)Math.Round(posw * (_rangeMin - _minimum) / (_maximum - _minimum));
@@ -671,63 +735,6 @@ namespace DoubleTrackBar
         {
             //RangePos2PixelPos();
             Invalidate(true);
-        }
-
-        private void OnKeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (Enabled)
-            {
-                if (_activeMark == ActiveMarkType.Left)
-                {
-                    if (e.KeyChar == '+')
-                    {
-                        _rangeMin++;
-                        if (_rangeMin > _maximum)
-                            _rangeMin = _maximum;
-                        if (_rangeMax < _rangeMin)
-                            _rangeMax = _rangeMin;
-                        OnRangeChanged(EventArgs.Empty);
-                    }
-                    else if (e.KeyChar == '-')
-                    {
-                        _rangeMin--;
-                        if (_rangeMin < _minimum)
-                            _rangeMin = _minimum;
-                        OnRangeChanged(EventArgs.Empty);
-                    }
-                }
-                else if (_activeMark == ActiveMarkType.Right)
-                {
-                    if (e.KeyChar == '+')
-                    {
-                        _rangeMax++;
-
-                        if (_rangeMax > _maximum)
-                        {
-                            _rangeMax = _maximum;
-                        }
-
-                        OnRangeChanged(EventArgs.Empty);
-                    }
-                    else if (e.KeyChar == '-')
-                    {
-                        _rangeMax--;
-
-                        if (_rangeMax < _minimum)
-                        {
-                            _rangeMax = _minimum;
-                        }
-
-                        if (_rangeMax < _rangeMin)
-                        {
-                            _rangeMin = _rangeMax;
-                        }
-                        
-                        OnRangeChanged(EventArgs.Empty);
-                    }
-                }
-                Invalidate(true);
-            }
         }
 
         private void OnLoad(object sender, EventArgs e)

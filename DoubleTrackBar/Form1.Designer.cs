@@ -28,11 +28,33 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            this.uksRangeBar3 = new DoubleTrackBar.UksRangeBar();
             this.zzzzRangeBarOriginal2 = new Zzzz.ZzzzRangeBarOriginal();
             this.uksRangeBar2 = new DoubleTrackBar.UksRangeBar();
             this.uksRangeBar1 = new DoubleTrackBar.UksRangeBar();
             this.zzzzRangeBarOriginal1 = new Zzzz.ZzzzRangeBarOriginal();
             this.SuspendLayout();
+            // 
+            // uksRangeBar3
+            // 
+            this.uksRangeBar3.DivisionNum = 100;
+            this.uksRangeBar3.FieldImage = ((System.Drawing.Bitmap)(resources.GetObject("uksRangeBar3.FieldImage")));
+            this.uksRangeBar3.HeightOfBar = 8;
+            this.uksRangeBar3.HeightOfMark = 24;
+            this.uksRangeBar3.HeightOfTick = 8;
+            this.uksRangeBar3.InnerColor = System.Drawing.Color.LightGreen;
+            this.uksRangeBar3.Location = new System.Drawing.Point(13, 306);
+            this.uksRangeBar3.Name = "uksRangeBar3";
+            this.uksRangeBar3.Orientation = DoubleTrackBar.UksRangeBar.RangeBarOrientation.Horizontal;
+            this.uksRangeBar3.RangeMaximum = 10;
+            this.uksRangeBar3.RangeMinimum = 0;
+            this.uksRangeBar3.ScaleOrientation = DoubleTrackBar.UksRangeBar.TopBottomOrientation.Bottom;
+            this.uksRangeBar3.Size = new System.Drawing.Size(596, 47);
+            this.uksRangeBar3.TabIndex = 4;
+            this.uksRangeBar3.TotalMaximum = 100;
+            this.uksRangeBar3.TotalMinimum = 0;
+            this.uksRangeBar3.ValueShownOnKnobsMove = false;
             // 
             // zzzzRangeBarOriginal2
             // 
@@ -47,7 +69,7 @@
             this.zzzzRangeBarOriginal2.RangeMaximum = 5;
             this.zzzzRangeBarOriginal2.RangeMinimum = 3;
             this.zzzzRangeBarOriginal2.ScaleOrientation = Zzzz.ZzzzRangeBarOriginal.TopBottomOrientation.bottom;
-            this.zzzzRangeBarOriginal2.Size = new System.Drawing.Size(43, 252);
+            this.zzzzRangeBarOriginal2.Size = new System.Drawing.Size(43, 260);
             this.zzzzRangeBarOriginal2.TabIndex = 3;
             this.zzzzRangeBarOriginal2.TotalMaximum = 10;
             this.zzzzRangeBarOriginal2.TotalMinimum = 0;
@@ -55,38 +77,43 @@
             // uksRangeBar2
             // 
             this.uksRangeBar2.DivisionNum = 100;
-            this.uksRangeBar2.HeightOfBar = 8;
-            this.uksRangeBar2.HeightOfMark = 24;
-            this.uksRangeBar2.HeightOfTick = 6;
+            this.uksRangeBar2.FieldImage = global::DoubleTrackBar.Properties.Resources.CtnWa8TWYAANVnw;
+            this.uksRangeBar2.HeightOfBar = 28;
+            this.uksRangeBar2.HeightOfMark = 30;
+            this.uksRangeBar2.HeightOfTick = 8;
             this.uksRangeBar2.InnerColor = System.Drawing.Color.LightGreen;
-            this.uksRangeBar2.Location = new System.Drawing.Point(528, 23);
+            this.uksRangeBar2.Location = new System.Drawing.Point(544, 23);
             this.uksRangeBar2.Name = "uksRangeBar2";
             this.uksRangeBar2.Orientation = DoubleTrackBar.UksRangeBar.RangeBarOrientation.Vertical;
             this.uksRangeBar2.RangeMaximum = 5;
             this.uksRangeBar2.RangeMinimum = 3;
             this.uksRangeBar2.ScaleOrientation = DoubleTrackBar.UksRangeBar.TopBottomOrientation.Bottom;
-            this.uksRangeBar2.Size = new System.Drawing.Size(77, 252);
+            this.uksRangeBar2.Size = new System.Drawing.Size(77, 277);
             this.uksRangeBar2.TabIndex = 2;
             this.uksRangeBar2.TotalMaximum = 100;
             this.uksRangeBar2.TotalMinimum = 0;
+            this.uksRangeBar2.ValueShownOnKnobsMove = false;
             // 
             // uksRangeBar1
             // 
-            this.uksRangeBar1.DivisionNum = 10;
-            this.uksRangeBar1.HeightOfBar = 8;
-            this.uksRangeBar1.HeightOfMark = 24;
-            this.uksRangeBar1.HeightOfTick = 6;
+            this.uksRangeBar1.DivisionNum = 100;
+            this.uksRangeBar1.FieldImage = global::DoubleTrackBar.Properties.Resources.Pleasure_Room_фэндомы_Panties_PR__3408621;
+            this.uksRangeBar1.HeightOfBar = 58;
+            this.uksRangeBar1.HeightOfMark = 122;
+            this.uksRangeBar1.HeightOfTick = 8;
             this.uksRangeBar1.InnerColor = System.Drawing.Color.LightGreen;
-            this.uksRangeBar1.Location = new System.Drawing.Point(13, 83);
+            this.uksRangeBar1.Location = new System.Drawing.Point(13, 94);
             this.uksRangeBar1.Name = "uksRangeBar1";
             this.uksRangeBar1.Orientation = DoubleTrackBar.UksRangeBar.RangeBarOrientation.Horizontal;
-            this.uksRangeBar1.RangeMaximum = 5;
-            this.uksRangeBar1.RangeMinimum = 3;
+            this.uksRangeBar1.RangeMaximum = 100;
+            this.uksRangeBar1.RangeMinimum = 100;
+            this.uksRangeBar1.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.uksRangeBar1.ScaleOrientation = DoubleTrackBar.UksRangeBar.TopBottomOrientation.Bottom;
-            this.uksRangeBar1.Size = new System.Drawing.Size(449, 67);
+            this.uksRangeBar1.Size = new System.Drawing.Size(449, 206);
             this.uksRangeBar1.TabIndex = 1;
-            this.uksRangeBar1.TotalMaximum = 10;
+            this.uksRangeBar1.TotalMaximum = 1000;
             this.uksRangeBar1.TotalMinimum = 0;
+            this.uksRangeBar1.ValueShownOnKnobsMove = true;
             // 
             // zzzzRangeBarOriginal1
             // 
@@ -95,7 +122,7 @@
             this.zzzzRangeBarOriginal1.HeightOfMark = 24;
             this.zzzzRangeBarOriginal1.HeightOfTick = 6;
             this.zzzzRangeBarOriginal1.InnerColor = System.Drawing.Color.LightGreen;
-            this.zzzzRangeBarOriginal1.Location = new System.Drawing.Point(13, 13);
+            this.zzzzRangeBarOriginal1.Location = new System.Drawing.Point(24, 23);
             this.zzzzRangeBarOriginal1.Name = "zzzzRangeBarOriginal1";
             this.zzzzRangeBarOriginal1.Orientation = Zzzz.ZzzzRangeBarOriginal.RangeBarOrientation.horizontal;
             this.zzzzRangeBarOriginal1.RangeMaximum = 5;
@@ -110,7 +137,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(621, 296);
+            this.ClientSize = new System.Drawing.Size(633, 369);
+            this.Controls.Add(this.uksRangeBar3);
             this.Controls.Add(this.zzzzRangeBarOriginal2);
             this.Controls.Add(this.uksRangeBar2);
             this.Controls.Add(this.uksRangeBar1);
@@ -129,6 +157,7 @@
         private UksRangeBar uksRangeBar1;
         private UksRangeBar uksRangeBar2;
         private Zzzz.ZzzzRangeBarOriginal zzzzRangeBarOriginal2;
+        private UksRangeBar uksRangeBar3;
 
     }
 }

@@ -52,10 +52,14 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TaskList.cs" />
     <Compile Include="UksRangeBar.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="ZzzzRangeBarOriginal.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ZzzzRangeBarRefactored..cs">
       <SubType>UserControl</SubType>
     </Compile>
     <EmbeddedResource Include="Form1.resx">
@@ -69,6 +73,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -82,6 +87,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\CtnWa8TWYAANVnw.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Pleasure-Room-фэндомы-Panties%28PR%29-3408621.jpeg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
