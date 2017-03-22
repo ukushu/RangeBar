@@ -59,9 +59,7 @@
     <Compile Include="ZzzzRangeBarOriginal.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ZzzzRangeBarRefactored..cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="ZzzzRangeBarRefactored.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -89,10 +87,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\CtnWa8TWYAANVnw.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Pleasure-Room-фэндомы-Panties%28PR%29-3408621.jpeg" />
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -77,7 +77,7 @@
             // uksRangeBar2
             // 
             this.uksRangeBar2.DivisionNum = 100;
-            this.uksRangeBar2.FieldImage = global::DoubleTrackBar.Properties.Resources.CtnWa8TWYAANVnw;
+            this.uksRangeBar2.FieldImage = null;
             this.uksRangeBar2.HeightOfBar = 28;
             this.uksRangeBar2.HeightOfMark = 30;
             this.uksRangeBar2.HeightOfTick = 8;
@@ -97,9 +97,9 @@
             // uksRangeBar1
             // 
             this.uksRangeBar1.DivisionNum = 100;
-            this.uksRangeBar1.FieldImage = global::DoubleTrackBar.Properties.Resources.Pleasure_Room_фэндомы_Panties_PR__3408621;
-            this.uksRangeBar1.HeightOfBar = 58;
-            this.uksRangeBar1.HeightOfMark = 122;
+            this.uksRangeBar1.FieldImage = null;
+            this.uksRangeBar1.HeightOfBar = 100;
+            this.uksRangeBar1.HeightOfMark = 120;
             this.uksRangeBar1.HeightOfTick = 8;
             this.uksRangeBar1.InnerColor = System.Drawing.Color.LightGreen;
             this.uksRangeBar1.Location = new System.Drawing.Point(13, 94);
