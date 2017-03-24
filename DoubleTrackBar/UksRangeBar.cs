@@ -57,8 +57,6 @@ namespace DoubleTrackBar
         public enum RangeBarOrientation { Horizontal, Vertical };
         public enum TopBottomOrientation { Top, Bottom, Both };
 
-        public bool _highlightingNumbers = true;
-
         private Color _colorInner = Color.LightGreen;
         private Color _colorRange = Color.FromKnownColor(KnownColor.Control);
         private Color _colorShadowLight = Color.FromKnownColor(KnownColor.ControlLightLight);
@@ -72,11 +70,16 @@ namespace DoubleTrackBar
 
         private RangeBarOrientation _orientationBar = RangeBarOrientation.Horizontal; // orientation of range bar
         private TopBottomOrientation _orientationScale = TopBottomOrientation.Bottom;
+
         private int _barHeight = 8;
         private int _markWidth = 8;
         private int _markHeight = 24;
         private int _tickHeight = 9;
         private int _numAxisDivision = 100;
+        private int _pixelsOffsetForNumber = 15;
+       
+        private int _topWidth;
+        private int _bottomWidth;
 
         private int _pixelPosL, _pixelPosR;
         private int _xPosMin, _xPosMax;
@@ -127,34 +130,6 @@ namespace DoubleTrackBar
             }
         }
 
-        public int HeightOfMark
-        {
-            set
-            {
-                _markHeight = Math.Max(_barHeight + 2, value);
-                Invalidate();
-                Update();
-            }
-            get
-            {
-                return _markHeight;
-            }
-        }
-
-        public int HeightOfBar
-        {
-            set
-            {
-                _barHeight = value;
-                Invalidate();
-                Update();
-            }
-            get
-            {
-                return _barHeight;
-            }
-        }
-
         public RangeBarOrientation Orientation
         {
             set
@@ -188,12 +163,15 @@ namespace DoubleTrackBar
             set
             {
                 _rangeMax = value;
+
                 if (_rangeMax < _minimum)
                     _rangeMax = _minimum;
                 else if (_rangeMax > _maximum)
                     _rangeMax = _maximum;
+
                 if (_rangeMax < _rangeMin)
                     _rangeMax = _rangeMin;
+
                 RangePos2PixelPos();
                 Invalidate(true);
             }
@@ -205,12 +183,15 @@ namespace DoubleTrackBar
             set
             {
                 _rangeMin = value;
+
                 if (_rangeMin < _minimum)
                     _rangeMin = _minimum;
                 else if (_rangeMin > _maximum)
                     _rangeMin = _maximum;
+
                 if (_rangeMin > _rangeMax)
                     _rangeMin = _rangeMax;
+
                 RangePos2PixelPos();
                 Invalidate(true);
             }
@@ -224,24 +205,29 @@ namespace DoubleTrackBar
         {
             set
             {
-                _maximum = (double)value;
+                _maximum = value;
+
                 if (_rangeMax > _maximum)
                     _rangeMax = _maximum;
+
                 RangePos2PixelPos();
+
                 Invalidate(true);
             }
             get { return (int)_maximum; }
         }
-
 
         public int TotalMinimum
         {
             set
             {
                 _minimum = value;
+
                 if (_rangeMin < _minimum)
                     _rangeMin = _minimum;
+
                 RangePos2PixelPos();
+
                 Invalidate(true);
             }
             get { return (int)_minimum; }
@@ -252,6 +238,7 @@ namespace DoubleTrackBar
             set
             {
                 _numAxisDivision = value;
+
                 Refresh();
             }
             get { return _numAxisDivision; }
@@ -267,11 +254,32 @@ namespace DoubleTrackBar
             get { return _colorInner; }
         }
 
+        private int MarkOffset
+        {
+            get
+            {
+                int barOffset;
+
+                if (_orientationBar == RangeBarOrientation.Horizontal)
+                {
+                    barOffset = (Height - _barHeight)/2;
+
+                    return barOffset + (_barHeight - _markHeight)/2 - 1;
+                }
+
+                barOffset = (Width + _barHeight) / 2;
+
+                return barOffset - _barHeight / 2 - _markHeight / 2;
+            }
+        }
+
         public void SelectRange(int left, int right)
         {
             RangeMinimum = left;
             RangeMaximum = right;
+
             RangePos2PixelPos();
+
             Invalidate(true);
         }
 
@@ -279,16 +287,14 @@ namespace DoubleTrackBar
         {
             _minimum = left;
             _maximum = right;
+
             RangePos2PixelPos();
             Invalidate(true);
         }
 
         private void OnPaint(object sender, PaintEventArgs e)
         {
-            int barOffset, markOffset;
-
-            CalcOffsets(out barOffset, out markOffset);
-
+            //TODO: CheckThisCode
             // range
             _xPosMin = _markWidth + 1;
             _xPosMax = (_orientationBar == RangeBarOrientation.Horizontal) ? (Width - _markWidth - 1) : (Height - _markWidth - 1);
@@ -298,37 +304,25 @@ namespace DoubleTrackBar
             if (_pixelPosL > _xPosMax) _pixelPosL = _xPosMax;
             if (_pixelPosR > _xPosMax) _pixelPosR = _xPosMax;
             if (_pixelPosR < _xPosMin) _pixelPosR = _xPosMin;
+            //End TODO
 
             RangePos2PixelPos();
+            
+            DrawSkala(e);
+            
+            DrawBarBackLine(e);
 
-            DrawBarBackLine(e, barOffset);
+            DrawSelectedRegion(e);
 
-            DrawSelectedRegion(e, barOffset);
+            RecalcKnobsPos(ref _lMarkPnt, _pixelPosL);//do not combine this method calls
+            RecalcKnobsPos(ref _rMarkPnt, _pixelPosR);
 
-            DrawSkala(e, barOffset);
-
-            RecalcKnobsPos(markOffset, ref _lMarkPnt, _pixelPosL);//do not combine this method calls
-            RecalcKnobsPos(markOffset, ref _rMarkPnt, _pixelPosR);
-
-            PaintKnob(e, _lMarkPnt, _pixelPosL, markOffset);//do not combine this method calls
-            PaintKnob(e, _rMarkPnt, _pixelPosR, markOffset);
+            PaintKnob(e, _lMarkPnt, _pixelPosL);//do not combine this method calls
+            PaintKnob(e, _rMarkPnt, _pixelPosR);
         }
 
-        private void CalcOffsets(out int barOffset, out int markOffset)
-        {
-            if (_orientationBar == RangeBarOrientation.Horizontal)
-            {
-                barOffset = (Height - _barHeight) / 2;
-                markOffset = barOffset + (_barHeight - _markHeight) / 2 - 1;
-            }
-            else
-            {
-                barOffset = (Width + _barHeight) / 2;
-                markOffset = barOffset - _barHeight / 2 - _markHeight / 2;
-            }
-        }
-
-        private void DrawBarBackLine(PaintEventArgs e, int barOffset)
+        //TODO: Optimization needed
+        private void DrawBarBackLine(PaintEventArgs e)
         {
             var magicOffset = 8;
 
@@ -337,58 +331,59 @@ namespace DoubleTrackBar
 
             if (_orientationBar == RangeBarOrientation.Horizontal)
             {
-                e.Graphics.FillRectangle(brushShadowDark, magicOffset, barOffset, Width - magicOffset * 2, sizeShadow);	// Top
-                e.Graphics.FillRectangle(brushShadowLight, Width - sizeShadow - magicOffset + 1, barOffset, sizeShadow, _barHeight - 1);	// Right//помилка по ходу десь тут
-                e.Graphics.FillRectangle(brushShadowLight, magicOffset, barOffset + _barHeight - 1 - sizeShadow, Width - magicOffset * 2, sizeShadow);	// Bottom
-                e.Graphics.FillRectangle(brushShadowDark, magicOffset, barOffset, sizeShadow, _barHeight - 1);	// Left
+                e.Graphics.FillRectangle(brushShadowDark, magicOffset, _topWidth, Width - magicOffset * 2, sizeShadow);	// Top
+                e.Graphics.FillRectangle(brushShadowLight, Width - sizeShadow - magicOffset + 1, _topWidth, sizeShadow, _bottomWidth - _topWidth + 1);	// Right
+                e.Graphics.FillRectangle(brushShadowLight, magicOffset, _bottomWidth, Width - magicOffset * 2, sizeShadow);	// Bottom
+                e.Graphics.FillRectangle(brushShadowDark, magicOffset, _topWidth, sizeShadow, _bottomWidth - _topWidth + 1);	// Left
 
                 if (FieldImage != null)
                 {
-                    e.Graphics.DrawImage(FieldImage, magicOffset + 1, barOffset + 1, Width - magicOffset * 2 - 1, _barHeight - 3);
+                    e.Graphics.DrawImage(FieldImage, magicOffset + 1, _topWidth + 1, Width - magicOffset * 2 - 1, _bottomWidth - _topWidth - 1);
                 }
             }
             else
             {
-                e.Graphics.FillRectangle(brushShadowDark, barOffset - _barHeight, magicOffset, _barHeight, sizeShadow);	// Top
-                e.Graphics.FillRectangle(brushShadowDark, barOffset - _barHeight, magicOffset, sizeShadow, Height - 2 * magicOffset);	// Left				
-                e.Graphics.FillRectangle(brushShadowLight, barOffset, magicOffset, sizeShadow, Height - 2 * magicOffset);	// Right
-                e.Graphics.FillRectangle(brushShadowLight, barOffset - _barHeight, Height - sizeShadow - magicOffset + 1, _barHeight - 1, sizeShadow);	// Bottom
+                e.Graphics.FillRectangle(brushShadowDark, _topWidth, magicOffset, Width - _topWidth * 2, sizeShadow);	// Top
+                e.Graphics.FillRectangle(brushShadowDark, _topWidth, magicOffset, sizeShadow, Height - 2 * magicOffset);	// Left				
+                e.Graphics.FillRectangle(brushShadowLight, Width - _topWidth, magicOffset, sizeShadow, Height - 2 * magicOffset);	// Right
+                e.Graphics.FillRectangle(brushShadowLight, _topWidth, Height - sizeShadow - magicOffset + 1, Width - _topWidth * 2 + 1, sizeShadow);	// Bottom
 
                 if (FieldImage != null)
                 {
-                    e.Graphics.DrawImage(FieldImage, barOffset - _barHeight + 1, magicOffset + 1, _barHeight - 2, (Height - 2 * magicOffset) - 1);
+                    e.Graphics.DrawImage(FieldImage, _topWidth + 1, magicOffset + 1, Width - _topWidth * 2 - 1, (Height - 2 * magicOffset) - 1);
                 }
             }
         }
 
-        private void DrawSelectedRegion(PaintEventArgs e, int barOffset)
+        private void DrawSelectedRegion(PaintEventArgs e)
         {
-            SolidBrush brushInner;
+            SolidBrush brushInner = new SolidBrush(_colorInner);
 
-            if (Enabled)
-                brushInner = new SolidBrush(_colorInner);
-            else
+            if (!Enabled)
                 brushInner = new SolidBrush(Color.FromKnownColor(KnownColor.InactiveCaption));
-
 
             if (_orientationBar == RangeBarOrientation.Horizontal)
             {
-                e.Graphics.FillRectangle(brushInner, _pixelPosL, barOffset + sizeShadow, _pixelPosR - _pixelPosL, _barHeight - 1 - 2 * sizeShadow);
-
+                e.Graphics.FillRectangle(brushInner, _pixelPosL, _topWidth + 1, _pixelPosR - _pixelPosL + 1, _bottomWidth - _topWidth - 1);
             }
             else
             {
-                e.Graphics.FillRectangle(brushInner, barOffset - _barHeight + sizeShadow, _pixelPosL, _barHeight - 2 * sizeShadow, _pixelPosR - _pixelPosL);
+                e.Graphics.FillRectangle(brushInner, _topWidth + 1, _pixelPosL, Width - _topWidth * 2 - 1, _pixelPosR - _pixelPosL + 1);
             }
         }
 
-        private void DrawSkala(PaintEventArgs e, int barOffset)
+        
+
+        //TODO: вивети обрахунок SkalaTop в змынну глобальну. це не можливо адекватно зробить...
+        private void DrawSkala(PaintEventArgs e)
         {
-            int tickyoff1, tickyoff2;
+            int skalaTop, skalaBottom;
 
             double deltaTick;
 
             int tickpos;
+
+            _pixelsOffsetForNumber = 12;
 
             Pen penShadowDark = new Pen(_colorShadowDark);
 
@@ -396,16 +391,16 @@ namespace DoubleTrackBar
             {
                 if (_orientationScale == TopBottomOrientation.Bottom)
                 {
-                    tickyoff1 = tickyoff2 = barOffset + _barHeight + 2;
+                    skalaTop = skalaBottom = Height - _tickHeight - _pixelsOffsetForNumber;
                 }
                 else if (_orientationScale == TopBottomOrientation.Top)
                 {
-                    tickyoff1 = tickyoff2 = barOffset - _tickHeight - 4;
+                    skalaTop = skalaBottom = _pixelsOffsetForNumber;
                 }
                 else
                 {
-                    tickyoff1 = barOffset + _barHeight + 2;
-                    tickyoff2 = barOffset - _tickHeight - 4;
+                    skalaTop = _pixelsOffsetForNumber;
+                    skalaBottom = Height - _tickHeight - _pixelsOffsetForNumber;
                 }
 
                 if (_numAxisDivision > 1)
@@ -418,17 +413,17 @@ namespace DoubleTrackBar
                             || _orientationScale == TopBottomOrientation.Both)
                         {
                             e.Graphics.DrawLine(penShadowDark, _markWidth + 1 + tickpos,
-                                tickyoff1,
+                                skalaTop,
                                 _markWidth + 1 + tickpos,
-                                tickyoff1 + _tickHeight);
+                                skalaTop + _tickHeight);
                         }
                         if (_orientationScale == TopBottomOrientation.Top
                             || _orientationScale == TopBottomOrientation.Both)
                         {
                             e.Graphics.DrawLine(penShadowDark, _markWidth + 1 + tickpos,
-                                tickyoff2,
+                                skalaBottom,
                                 _markWidth + 1 + tickpos,
-                                tickyoff2 + _tickHeight);
+                                skalaBottom + _tickHeight);
                         }
                     }
                 }
@@ -436,18 +431,20 @@ namespace DoubleTrackBar
             }
             else // Vertical bar
             {
+                _pixelsOffsetForNumber += (6 * TotalMaximum.ToString().Length - 1);
+
                 if (_orientationScale == TopBottomOrientation.Bottom)
                 {
-                    tickyoff1 = tickyoff2 = barOffset + 2;
+                    skalaTop = skalaBottom = Width - _tickHeight - _pixelsOffsetForNumber;
                 }
                 else if (_orientationScale == TopBottomOrientation.Top)
                 {
-                    tickyoff1 = tickyoff2 = barOffset - _barHeight - 2 - _tickHeight;
+                    skalaTop = skalaBottom = _pixelsOffsetForNumber;
                 }
                 else
                 {
-                    tickyoff1 = barOffset + 2;
-                    tickyoff2 = barOffset - _barHeight - 2 - _tickHeight;
+                    skalaTop = _pixelsOffsetForNumber;
+                    skalaBottom = Width - _tickHeight - _pixelsOffsetForNumber;
                 }
 
                 if (_numAxisDivision > 1)
@@ -459,36 +456,42 @@ namespace DoubleTrackBar
                         if (_orientationScale == TopBottomOrientation.Bottom || _orientationScale == TopBottomOrientation.Both)
                         {
                             e.Graphics.DrawLine(penShadowDark,
-                                tickyoff1,
+                                skalaTop,
                                 _markWidth + 1 + tickpos,
-                                tickyoff1 + _tickHeight,
+                                skalaTop + _tickHeight,
                                 _markWidth + 1 + tickpos);
                         }
                         if (_orientationScale == TopBottomOrientation.Top || _orientationScale == TopBottomOrientation.Both)
                         {
                             e.Graphics.DrawLine(penShadowDark,
-                                tickyoff2,
+                                skalaBottom,
                                 _markWidth + 1 + tickpos,
-                                tickyoff2 + _tickHeight,
+                                skalaBottom + _tickHeight,
                                 _markWidth + 1 + tickpos);
                         }
                     }
                 }
             }
 
-            ShowCurrPosValueIfNeeded(e, tickyoff1);
+            _bottomWidth = Height - _tickHeight - _pixelsOffsetForNumber - 3;
+            _topWidth = _tickHeight + _pixelsOffsetForNumber + 3; 
+
+            ShowCurrPosValueIfNeeded(e, skalaTop);
         }
 
-        private void RecalcKnobsPos(int markOffset, ref Point[] pos, int pixelPos)
+        private void RecalcKnobsPos(ref Point[] pos, int pixelPos)
         {
             int markWidth = (pos == _lMarkPnt) ? _markWidth : -_markWidth;
 
             var offsetX = markWidth / 2;
 
-            pos[0].X = pixelPos - offsetX; pos[0].Y = markOffset + _markHeight / 50;
-            pos[1].X = pixelPos + offsetX; pos[1].Y = markOffset;
-            pos[2].X = pixelPos + offsetX; pos[2].Y = markOffset + _markHeight;
-            pos[3].X = pixelPos - offsetX; pos[3].Y = markOffset + _markHeight;
+            pos[0].X = pos[3].X = pixelPos - offsetX;
+            pos[1].X = pos[2].X = pixelPos + offsetX;
+
+            int localHeight = (_orientationBar == RangeBarOrientation.Horizontal) ? Height : Width;
+            
+            pos[0].Y = pos[1].Y =  _topWidth - 1;
+            pos[2].Y = pos[3].Y = localHeight - _topWidth + 1;
 
             if (_orientationBar == RangeBarOrientation.Vertical)
             {
@@ -513,8 +516,10 @@ namespace DoubleTrackBar
             }
         }
 
-        private void PaintKnob(PaintEventArgs e, Point[] pos, int pixelPos, int markOffset)
+        private void PaintKnob(PaintEventArgs e, Point[] pos, int pixelPos)
         {
+            var markOffset = MarkOffset;
+
             Pen penShadowLight = new Pen(_colorShadowLight);
             Pen penShadowDark = new Pen(_colorShadowDark);
 
@@ -553,24 +558,39 @@ namespace DoubleTrackBar
             Font fontMark = new Font("Arial", _markWidth);
             SolidBrush brushMark = new SolidBrush(_colorShadowDark);
 
+            int y = 0;
+            int localWidth = _orientationBar == RangeBarOrientation.Horizontal ? Height : Width;
+            
+            switch (ScaleOrientation) 
+            {
+                case TopBottomOrientation.Bottom:
+                y = tickOffset + _tickHeight;
+                break;
+                case TopBottomOrientation.Top:
+                y = localWidth - _topWidth;
+                break;
+                case TopBottomOrientation.Both:
+                y = localWidth - _pixelsOffsetForNumber;
+                break;
+            }
+
             StringFormat strformat = new StringFormat();
 
             if (_moveLMark)
-            {
+            {  
                 if (_orientationBar == RangeBarOrientation.Horizontal)
                 {
                     strformat.Alignment = StringAlignment.Center;
                     strformat.LineAlignment = StringAlignment.Near;
 
-                    e.Graphics.DrawString(_rangeMin.ToString(), fontMark, brushMark, _pixelPosL, tickOffset + _tickHeight, strformat);
+                    e.Graphics.DrawString(_rangeMin.ToString(), fontMark, brushMark, _pixelPosL, y, strformat);
                 }
                 else
                 {
-
                     strformat.Alignment = StringAlignment.Near;
                     strformat.LineAlignment = StringAlignment.Center;
 
-                    e.Graphics.DrawString(_rangeMin.ToString(), fontMark, brushMark, tickOffset + _tickHeight + 2, _pixelPosL, strformat);
+                    e.Graphics.DrawString(_rangeMin.ToString(), fontMark, brushMark, y + 2, _pixelPosL, strformat);
                 }
             }
 
@@ -581,14 +601,14 @@ namespace DoubleTrackBar
                     strformat.Alignment = StringAlignment.Center;
                     strformat.LineAlignment = StringAlignment.Near;
 
-                    e.Graphics.DrawString(_rangeMax.ToString(), fontMark, brushMark, _pixelPosR, tickOffset + _tickHeight, strformat);
+                    e.Graphics.DrawString(_rangeMax.ToString(), fontMark, brushMark, _pixelPosR, y, strformat);
                 }
                 else
                 {
                     strformat.Alignment = StringAlignment.Near;
                     strformat.LineAlignment = StringAlignment.Center;
 
-                    e.Graphics.DrawString(_rangeMax.ToString(), fontMark, brushMark, tickOffset + _tickHeight, _pixelPosR, strformat);
+                    e.Graphics.DrawString(_rangeMax.ToString(), fontMark, brushMark, y, _pixelPosR, strformat);
                 }
             }
         }

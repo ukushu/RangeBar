@@ -59,7 +59,9 @@
     <Compile Include="ZzzzRangeBarOriginal.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ZzzzRangeBarRefactored.cs" />
+    <Compile Include="ZzzzRangeBarRefactored.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

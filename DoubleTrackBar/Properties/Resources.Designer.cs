@@ -59,25 +59,5 @@ namespace DoubleTrackBar.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap CtnWa8TWYAANVnw {
-            get {
-                object obj = ResourceManager.GetObject("CtnWa8TWYAANVnw", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap Pleasure_Room_фэндомы_Panties_PR__3408621 {
-            get {
-                object obj = ResourceManager.GetObject("Pleasure-Room-фэндомы-Panties(PR)-3408621", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
     }
 }
