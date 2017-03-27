@@ -19,8 +19,8 @@ ______________________________________________
 
 Example of usage UksRangeBar on the form:
 
-![Range Bar](http://image.prntscr.com/image/aa20944ebb124dc3b103f5c3755cdb22.png "c# trackbar range selection")
+![Range Bar](http://image.prntscr.com/image/1c695bb6538f4420b88f455d1fb7393a.png "c# trackbar range selection")
 
 Properties you able to change:
 
-![Alt text](http://image.prntscr.com/image/27bce947beae4ae28d5a22c39d10df97.png "c# trackbar range selection")
+![Alt text](http://image.prntscr.com/image/f1c5b6ca985f48c0a0ac57c8c9ac1354.png "c# trackbar range selection")
