@@ -229,7 +229,7 @@ namespace DoubleTrackBar
                 _numAxisDivision = value;
 
                 Refresh();
-            }s
+            }
         }
 
         public Color InnerColor
