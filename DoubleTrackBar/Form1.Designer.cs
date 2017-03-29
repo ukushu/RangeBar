@@ -51,7 +51,7 @@
             this.uksRangeBar1.RangeMaximum = 10;
             this.uksRangeBar1.RangeMinimum = 0;
             this.uksRangeBar1.ScaleOrientation = DoubleTrackBar.UksRangeBar.TopBottomOrientation.Top;
-            this.uksRangeBar1.Size = new System.Drawing.Size(344, 64);
+            this.uksRangeBar1.Size = new System.Drawing.Size(381, 67);
             this.uksRangeBar1.TabIndex = 15;
             this.uksRangeBar1.TotalMaximum = 100;
             this.uksRangeBar1.TotalMinimum = 0;
@@ -70,7 +70,7 @@
             this.uksRangeBar6.RangeMaximum = 10;
             this.uksRangeBar6.RangeMinimum = 0;
             this.uksRangeBar6.ScaleOrientation = DoubleTrackBar.UksRangeBar.TopBottomOrientation.Both;
-            this.uksRangeBar6.Size = new System.Drawing.Size(101, 324);
+            this.uksRangeBar6.Size = new System.Drawing.Size(110, 324);
             this.uksRangeBar6.TabIndex = 14;
             this.uksRangeBar6.TotalMaximum = 100;
             this.uksRangeBar6.TotalMinimum = 0;
@@ -107,7 +107,7 @@
             this.uksRangeBar4.RangeMaximum = 30;
             this.uksRangeBar4.RangeMinimum = 10;
             this.uksRangeBar4.ScaleOrientation = DoubleTrackBar.UksRangeBar.TopBottomOrientation.Bottom;
-            this.uksRangeBar4.Size = new System.Drawing.Size(134, 324);
+            this.uksRangeBar4.Size = new System.Drawing.Size(149, 324);
             this.uksRangeBar4.TabIndex = 12;
             this.uksRangeBar4.TotalMaximum = 100;
             this.uksRangeBar4.TotalMinimum = 0;
@@ -125,7 +125,7 @@
             this.uksRangeBar3.RangeMaximum = 10;
             this.uksRangeBar3.RangeMinimum = 0;
             this.uksRangeBar3.ScaleOrientation = DoubleTrackBar.UksRangeBar.TopBottomOrientation.Bottom;
-            this.uksRangeBar3.Size = new System.Drawing.Size(408, 64);
+            this.uksRangeBar3.Size = new System.Drawing.Size(418, 76);
             this.uksRangeBar3.TabIndex = 11;
             this.uksRangeBar3.TotalMaximum = 100;
             this.uksRangeBar3.TotalMinimum = 0;
@@ -144,7 +144,7 @@
             this.uksRangeBar2.RangeMaximum = 10;
             this.uksRangeBar2.RangeMinimum = 0;
             this.uksRangeBar2.ScaleOrientation = DoubleTrackBar.UksRangeBar.TopBottomOrientation.Both;
-            this.uksRangeBar2.Size = new System.Drawing.Size(418, 96);
+            this.uksRangeBar2.Size = new System.Drawing.Size(408, 103);
             this.uksRangeBar2.TabIndex = 9;
             this.uksRangeBar2.TotalMaximum = 100;
             this.uksRangeBar2.TotalMinimum = 0;

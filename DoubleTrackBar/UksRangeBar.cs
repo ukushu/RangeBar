@@ -23,6 +23,251 @@ namespace DoubleTrackBar
         /// </summary>
         private System.ComponentModel.Container _components = null;
 
+        private Color _colorInner = Color.LightGreen;
+        private Color _colorRange = Color.FromKnownColor(KnownColor.Control);
+
+        private double _minimum;
+        private double _maximum = 100;
+
+        private double _rangeMin;
+        private double _rangeMax = 10;
+
+        private ActiveMarkType _activeKnob = ActiveMarkType.None;
+
+        private RangeBarOrientation _orientationBar = RangeBarOrientation.Horizontal;
+        private TopBottomOrientation _orientationScale = TopBottomOrientation.Bottom;
+
+        private int _barHeight = 8;
+        private int _knobWidth = 8;
+        
+        
+        private int _tickHeight = 9;
+        private int _numAxisDivision = 100;
+
+        private int _skalaToBackFieldDistance = 3;
+
+        private int _pixelPosL, _pixelPosR;
+
+        private Rectangle _lKnobRect =  new Rectangle();
+        private Rectangle _rKnobRect = new Rectangle();
+
+        private bool _lKnobMoveGoing = false;
+        private bool _rKnobIsMoving = false;
+
+        private bool _valueShownOnKnobsMove;
+
+        private Bitmap _fieldImage;
+
+        private int KnobHeight {
+            get
+            {
+                return LocalHeight - PixelsOffsetForNumber * 2 - _tickHeight - _skalaToBackFieldDistance;
+            }
+        }
+        private int PixelsOffsetForNumber
+        {
+            get
+            {
+                if (_orientationBar == RangeBarOrientation.Vertical)
+                {
+                    return (6 * TotalMaximum.ToString().Length - 1) + 12;
+                }
+
+                return 12;
+            }
+        }
+        private int TopOffsetToBackField
+        {
+            get { return _tickHeight + PixelsOffsetForNumber + _skalaToBackFieldDistance;}
+        }
+        private int BottomOffsetToBackField
+        {
+            get { return LocalHeight - _tickHeight - PixelsOffsetForNumber - _skalaToBackFieldDistance; }
+        }
+
+        private int PixelPosXmin
+        {
+            get { return _knobWidth + 1;}
+        }
+        private int PixelPosXmax
+        {
+            get { return LocalWidth - _knobWidth - 1; }
+        }
+
+        public Bitmap FieldImage
+        {
+            get { return _fieldImage; }
+            set
+            {
+                _fieldImage = value;
+                Invalidate();
+                Update();
+            }
+        }
+
+        public bool ValueShownOnKnobsMove
+        {
+            get { return _valueShownOnKnobsMove; }
+            set
+            {
+                _valueShownOnKnobsMove = value;
+                Invalidate();
+                Update();
+            }
+        }
+
+        public int HeightOfTick
+        {
+            get { return _tickHeight; }
+            set
+            {
+                _tickHeight = Math.Min(Math.Max(1, value), _barHeight);
+                Invalidate();
+                Update();
+            }
+        }
+
+        public RangeBarOrientation Orientation
+        {
+            get { return _orientationBar; }
+            set
+            {
+                _orientationBar = value;
+                Invalidate();
+                Update();
+            }
+        }
+
+        public TopBottomOrientation ScaleOrientation
+        {
+            get { return _orientationScale; }
+            set
+            {
+                _orientationScale = value;
+                Invalidate();
+                Update();
+            }
+        }
+
+        public int RangeMaximum
+        {
+            get { return (int)_rangeMax; }
+            set
+            {
+                _rangeMax = value;
+
+                if (_rangeMax < _minimum)
+                    _rangeMax = _minimum;
+                else if (_rangeMax > _maximum)
+                    _rangeMax = _maximum;
+
+                if (_rangeMax < _rangeMin)
+                    _rangeMax = _rangeMin;
+
+                RangePos2PixelPos();
+                Invalidate(true);
+            }
+        }
+
+        public int RangeMinimum
+        {
+            get { return (int)_rangeMin; }
+            set
+            {
+                _rangeMin = value;
+
+                if (_rangeMin < _minimum)
+                    _rangeMin = _minimum;
+                else if (_rangeMin > _maximum)
+                    _rangeMin = _maximum;
+
+                if (_rangeMin > _rangeMax)
+                    _rangeMin = _rangeMax;
+
+                RangePos2PixelPos();
+                Invalidate(true);
+            }
+        }
+
+        public int TotalMaximum
+        {
+            get { return (int)_maximum; }
+            set
+            {
+                _maximum = value;
+
+                if (_rangeMax > _maximum)
+                    _rangeMax = _maximum;
+
+                RangePos2PixelPos();
+
+                Invalidate(true);
+            }
+        }
+
+        public int TotalMinimum
+        {
+            get { return (int)_minimum; }
+            set
+            {
+                _minimum = value;
+
+                if (_rangeMin < _minimum)
+                    _rangeMin = _minimum;
+
+                RangePos2PixelPos();
+
+                Invalidate(true);
+            }
+        }
+
+        public int DivisionNum
+        {
+            get { return _numAxisDivision; }
+            set
+            {
+                _numAxisDivision = value;
+
+                Refresh();
+            }s
+        }
+
+        public Color InnerColor
+        {
+            get { return _colorInner; }
+            set
+            {
+                _colorInner = value;
+                Refresh();
+            }
+        }
+        
+        private int LocalHeight
+        {
+            get { return (_orientationBar == RangeBarOrientation.Horizontal) ? Height : Width; }
+            set
+            {
+                if (_orientationBar == RangeBarOrientation.Horizontal)
+                {
+                    Height = value;
+                }
+                else
+                {
+                    Width = value;
+                }
+            }
+        }
+        
+        private int LocalWidth
+        {
+            get { return (_orientationBar == RangeBarOrientation.Horizontal) ? Width : Height; }
+        }
+
+        private int MinLocalHeight
+        {
+            get { return 2 * TopOffsetToBackField + 6; }
+        }
+
         public UksRangeBar()
         {
             Name = "UksRangeBar";
@@ -36,7 +281,7 @@ namespace DoubleTrackBar
             MouseMove += OnMouseMove;
             MouseDown += OnMouseDown;
 
-
+            //Maybe not the best solution, but system colors can be changes not soften due to runtime
             var lightShadowColor = Color.FromKnownColor(KnownColor.ControlLightLight);
             var darkhadowColor = Color.FromKnownColor(KnownColor.ControlDarkDark);
 
@@ -59,277 +304,6 @@ namespace DoubleTrackBar
             base.Dispose(disposing);
         }
 
-        public enum ActiveMarkType { None, Left, Right };
-        public enum RangeBarOrientation { Horizontal, Vertical };
-        public enum TopBottomOrientation { Top, Bottom, Both };
-
-        private Color _colorInner = Color.LightGreen;
-        private Color _colorRange = Color.FromKnownColor(KnownColor.Control);
-        //private Color _colorShadowLight = Color.FromKnownColor(KnownColor.ControlLightLight);
-        //private Color _colorShadowDark = Color.FromKnownColor(KnownColor.ControlDarkDark);
-
-        private double _minimum;
-        private double _maximum = 100;
-
-        private double _rangeMin;
-        private double _rangeMax = 10;
-
-        private ActiveMarkType _activeMark = ActiveMarkType.None;
-
-        private RangeBarOrientation _orientationBar = RangeBarOrientation.Horizontal; // orientation of range bar
-        private TopBottomOrientation _orientationScale = TopBottomOrientation.Bottom;
-
-        private int _barHeight = 8;
-        private int _markWidth = 8;
-        private int MarkHeight {
-            get
-            {
-                return LocalHeight - PixelsOffsetForNumber * 2 - _tickHeight - _skalaToBackFieldDistance;
-            }
-        }
-        private int _tickHeight = 9;
-        private int _numAxisDivision = 100;
-
-        private int PixelsOffsetForNumber
-        {
-            get
-            {
-                if (_orientationBar == RangeBarOrientation.Vertical)
-                {
-                    return (6 * TotalMaximum.ToString().Length - 1) + 12;
-                }
-
-                return 12;
-            }
-        }
-
-        private int _skalaToBackFieldDistance = 3;
-
-        private int TopOffsetToBackField
-        {
-            get { return _tickHeight + PixelsOffsetForNumber + _skalaToBackFieldDistance;}
-        }
-        private int BottomOffsetToBackField
-        {
-            get { return LocalHeight - _tickHeight - PixelsOffsetForNumber - _skalaToBackFieldDistance; }
-        }
-
-        private int _pixelPosL, _pixelPosR;
-        
-        private int PixelPosXmin
-        {
-            get { return _markWidth + 1;}
-        }
-        private int PixelPosXmax
-        {
-            get { return LocalWidth - _markWidth - 1; }
-        }
-
-        private Rectangle _lMarkRect =  new Rectangle();
-        private Rectangle _rMarkRect = new Rectangle();
-
-        private bool _moveLMark = false;
-        private bool _moveRMark = false;
-
-        private bool _valueShownOnKnobsMove;
-
-        private Bitmap _fieldImage;
-
-        public Bitmap FieldImage
-        {
-            set
-            {
-                _fieldImage = value;
-                Invalidate();
-                Update();
-            }
-            get { return _fieldImage; }
-        }
-
-        public bool ValueShownOnKnobsMove
-        {
-            set
-            {
-                _valueShownOnKnobsMove = value;
-                Invalidate();
-                Update();
-            }
-            get { return _valueShownOnKnobsMove; }
-        }
-
-        public int HeightOfTick
-        {
-            set
-            {
-                _tickHeight = Math.Min(Math.Max(1, value), _barHeight);
-                Invalidate();
-                Update();
-            }
-            get
-            {
-                return _tickHeight;
-            }
-        }
-
-        public RangeBarOrientation Orientation
-        {
-            set
-            {
-                _orientationBar = value;
-                Invalidate();
-                Update();
-            }
-            get
-            {
-                return _orientationBar;
-            }
-        }
-
-        public TopBottomOrientation ScaleOrientation
-        {
-            set
-            {
-                _orientationScale = value;
-                Invalidate();
-                Update();
-            }
-            get
-            {
-                return _orientationScale;
-            }
-        }
-
-        public int RangeMaximum
-        {
-            set
-            {
-                _rangeMax = value;
-
-                if (_rangeMax < _minimum)
-                    _rangeMax = _minimum;
-                else if (_rangeMax > _maximum)
-                    _rangeMax = _maximum;
-
-                if (_rangeMax < _rangeMin)
-                    _rangeMax = _rangeMin;
-
-                RangePos2PixelPos();
-                Invalidate(true);
-            }
-            get { return (int)_rangeMax; }
-        }
-
-        public int RangeMinimum
-        {
-            set
-            {
-                _rangeMin = value;
-
-                if (_rangeMin < _minimum)
-                    _rangeMin = _minimum;
-                else if (_rangeMin > _maximum)
-                    _rangeMin = _maximum;
-
-                if (_rangeMin > _rangeMax)
-                    _rangeMin = _rangeMax;
-
-                RangePos2PixelPos();
-                Invalidate(true);
-            }
-            get
-            {
-                return (int)_rangeMin;
-            }
-        }
-
-        public int TotalMaximum
-        {
-            set
-            {
-                _maximum = value;
-
-                if (_rangeMax > _maximum)
-                    _rangeMax = _maximum;
-
-                RangePos2PixelPos();
-
-                Invalidate(true);
-            }
-            get { return (int)_maximum; }
-        }
-
-        public int TotalMinimum
-        {
-            set
-            {
-                _minimum = value;
-
-                if (_rangeMin < _minimum)
-                    _rangeMin = _minimum;
-
-                RangePos2PixelPos();
-
-                Invalidate(true);
-            }
-            get { return (int)_minimum; }
-        }
-
-        public int DivisionNum
-        {
-            set
-            {
-                _numAxisDivision = value;
-
-                Refresh();
-            }
-            get { return _numAxisDivision; }
-        }
-
-        public Color InnerColor
-        {
-            set
-            {
-                _colorInner = value;
-                Refresh();
-            }
-            get { return _colorInner; }
-        }
-        
-        private int MarkOffset
-        {
-            get
-            {
-                int barOffset;
-
-                if (_orientationBar == RangeBarOrientation.Horizontal)
-                {
-                    barOffset = (Height - _barHeight) / 2;
-
-                    return barOffset + (_barHeight - MarkHeight) / 2 - 1;
-                }
-
-                barOffset = (Width + _barHeight) / 2;
-
-                return barOffset - _barHeight / 2 - MarkHeight / 2;
-            }
-        }
-
-        private int LocalHeight
-        {
-            get
-            {
-                return (_orientationBar == RangeBarOrientation.Horizontal) ? Height : Width;
-            }
-        }
-        
-        private int LocalWidth
-        {
-            get
-            {
-                return (_orientationBar == RangeBarOrientation.Horizontal) ? Width : Height;
-            }
-        }
-        
         public void SelectRange(int left, int right)
         {
             RangeMinimum = left;
@@ -356,7 +330,6 @@ namespace DoubleTrackBar
             if (_pixelPosL > PixelPosXmax) _pixelPosL = PixelPosXmax;
             if (_pixelPosR > PixelPosXmax) _pixelPosR = PixelPosXmax;
             if (_pixelPosR < PixelPosXmin) _pixelPosR = PixelPosXmin;
-            //EndTODO
 
             RangePos2PixelPos();
             
@@ -366,11 +339,11 @@ namespace DoubleTrackBar
 
             DrawSelectedRegion(e);
 
-            RecalcKnobsPos(ref _lMarkRect, _pixelPosL);//do not combine this method calls
-            RecalcKnobsPos(ref _rMarkRect, _pixelPosR);
+            RecalcKnobsPos(ref _lKnobRect, _pixelPosL);//do not combine this method calls
+            RecalcKnobsPos(ref _rKnobRect, _pixelPosR);
 
-            PaintKnob(e, _lMarkRect, _pixelPosL);//do not combine this method calls
-            PaintKnob(e, _rMarkRect, _pixelPosR);
+            PaintKnob(e, _lKnobRect, _pixelPosL);//do not combine this method calls
+            PaintKnob(e, _rKnobRect, _pixelPosR);
         }
 
         private void DrawBarField(PaintEventArgs e)
@@ -506,7 +479,7 @@ namespace DoubleTrackBar
 
         private void RecalcKnobsPos(ref Rectangle rect, int pixelPos)
         {
-            var offsetX = _markWidth/2;
+            var offsetX = _knobWidth/2;
             var offsetY = (_tickHeight + _skalaToBackFieldDistance)/2;
 
             Point topL;
@@ -515,23 +488,18 @@ namespace DoubleTrackBar
             {
                 topL = new Point(pixelPos - offsetX, TopOffsetToBackField - offsetY);
                 
-                rect = new Rectangle(topL, new Size(_markWidth, MarkHeight));
+                rect = new Rectangle(topL, new Size(_knobWidth, KnobHeight));
                 
                 return;
             }
 
             topL = new Point(TopOffsetToBackField - offsetY, pixelPos - offsetX);
 
-            rect = new Rectangle(topL, new Size(MarkHeight, _markWidth));
+            rect = new Rectangle(topL, new Size(KnobHeight, _knobWidth));
         }
 
         private void PaintKnob(PaintEventArgs e, Rectangle pos, int pixelPos)
         {
-            var markOffset = MarkOffset;
-
-            //Pen penShadowLight = new Pen(_colorShadowLight);
-            //Pen penShadowDark = new Pen(_colorShadowDark);
-
             SolidBrush brushRange = new SolidBrush(_colorRange);
 
             var rectanglePoints = new Point[]{
@@ -539,8 +507,7 @@ namespace DoubleTrackBar
                 new Point(pos.X+pos.Width, pos.Y), //topR
                 new Point(pos.X+pos.Width, pos.Y+ pos.Height),//bottR
                 new Point(pos.X, pos.Y+ pos.Height) //BottL
-            };
-            
+            };           
 
             //Fill range between knobs
             e.Graphics.FillPolygon(brushRange, rectanglePoints);
@@ -583,33 +550,33 @@ namespace DoubleTrackBar
             strformat.Alignment = StringAlignment.Center;
             strformat.LineAlignment = StringAlignment.Near;
 
-            if (_moveLMark)
+            if (_lKnobMoveGoing)
             {  
                 if (_orientationBar == RangeBarOrientation.Horizontal)
                 {
-                    ComponentDrawer.DrawString(e, _rangeMin.ToString(), _markWidth, _pixelPosL, y, strformat);
+                    ComponentDrawer.DrawString(e, _rangeMin.ToString(), _knobWidth, _pixelPosL, y, strformat);
                 }
                 else
                 {
                     strformat.Alignment = StringAlignment.Near;
                     strformat.LineAlignment = StringAlignment.Center;
 
-                    ComponentDrawer.DrawString(e, _rangeMin.ToString(), _markWidth, y + 2, _pixelPosL, strformat);
+                    ComponentDrawer.DrawString(e, _rangeMin.ToString(), _knobWidth, y + 2, _pixelPosL, strformat);
                 }
             }
 
-            if (_moveRMark)
+            if (_rKnobIsMoving)
             {
                 if (_orientationBar == RangeBarOrientation.Horizontal)
                 {
-                    ComponentDrawer.DrawString(e, _rangeMax.ToString(), _markWidth, _pixelPosR, y, strformat);
+                    ComponentDrawer.DrawString(e, _rangeMax.ToString(), _knobWidth, _pixelPosR, y, strformat);
                 }
                 else
                 {
                     strformat.Alignment = StringAlignment.Near;
                     strformat.LineAlignment = StringAlignment.Center;
 
-                    ComponentDrawer.DrawString(e, _rangeMax.ToString(), _markWidth, y, _pixelPosR, strformat);
+                    ComponentDrawer.DrawString(e, _rangeMax.ToString(), _knobWidth, y, _pixelPosR, strformat);
                 }
             }
         }
@@ -618,18 +585,18 @@ namespace DoubleTrackBar
         {
             if (Enabled)
             {
-                if (_lMarkRect.Contains(e.X, e.Y))
+                if (_lKnobRect.Contains(e.X, e.Y))
                 {
                     Capture = true;
-                    _moveLMark = true;
-                    _activeMark = ActiveMarkType.Left;
+                    _lKnobMoveGoing = true;
+                    _activeKnob = ActiveMarkType.Left;
                     Invalidate(true);
                 }
-                else if (_rMarkRect.Contains(e.X, e.Y))
+                else if (_rKnobRect.Contains(e.X, e.Y))
                 {
                     Capture = true;
-                    _moveRMark = true;
-                    _activeMark = ActiveMarkType.Right;
+                    _rKnobIsMoving = true;
+                    _activeKnob = ActiveMarkType.Right;
                     Invalidate(true);
                 }
             }
@@ -641,8 +608,8 @@ namespace DoubleTrackBar
             {
                 Capture = false;
 
-                _moveLMark = false;
-                _moveRMark = false;
+                _lKnobMoveGoing = false;
+                _rKnobIsMoving = false;
 
                 Invalidate();
 
@@ -654,7 +621,7 @@ namespace DoubleTrackBar
         {
             if (Enabled)
             {
-                if (_lMarkRect.Contains(e.X, e.Y) || _rMarkRect.Contains(e.X, e.Y))
+                if (_lKnobRect.Contains(e.X, e.Y) || _rKnobRect.Contains(e.X, e.Y))
                 {
                     Cursor = (_orientationBar == RangeBarOrientation.Horizontal) ? Cursors.SizeWE : Cursors.SizeNS;
                 }
@@ -663,7 +630,7 @@ namespace DoubleTrackBar
                     Cursor = Cursors.Arrow;
                 }
 
-                if (_moveLMark)
+                if (_lKnobMoveGoing)
                 {
                     Cursor = (_orientationBar == RangeBarOrientation.Horizontal) ? Cursors.SizeWE : Cursors.SizeNS;
 
@@ -677,12 +644,12 @@ namespace DoubleTrackBar
                         _pixelPosR = _pixelPosL;
                     
                     PixelPos2RangePos();
-                    _activeMark = ActiveMarkType.Left;
+                    _activeKnob = ActiveMarkType.Left;
                     Invalidate(true);
 
                     OnRangeChanging(EventArgs.Empty);
                 }
-                else if (_moveRMark)
+                else if (_rKnobIsMoving)
                 {
                     Cursor = (_orientationBar == RangeBarOrientation.Horizontal) ? Cursors.SizeWE : Cursors.SizeNS;
 
@@ -696,7 +663,7 @@ namespace DoubleTrackBar
                         _pixelPosL = _pixelPosR;
                     
                     PixelPos2RangePos();
-                    _activeMark = ActiveMarkType.Right;
+                    _activeKnob = ActiveMarkType.Right;
                     Invalidate(true);
 
                     OnRangeChanging(EventArgs.Empty);
@@ -706,7 +673,7 @@ namespace DoubleTrackBar
 
         private void PixelPos2RangePos()
         {
-            int posw = LocalWidth - 2 * _markWidth - 2;
+            int posw = LocalWidth - 2 * _knobWidth - 2;
 
             _rangeMin = _minimum + (int)Math.Round((_maximum - _minimum) * (_pixelPosL - PixelPosXmin) / posw);
             _rangeMax = _minimum + (int)Math.Round((_maximum - _minimum) * (_pixelPosR - PixelPosXmin) / posw);
@@ -714,7 +681,7 @@ namespace DoubleTrackBar
 
         private void RangePos2PixelPos()
         {
-            int posw = LocalWidth - 2 * _markWidth - 2;
+            int posw = LocalWidth - 2 * _knobWidth - 2;
 
             _pixelPosL = PixelPosXmin + (int)Math.Round(posw * (_rangeMin - _minimum) / (_maximum - _minimum));
             _pixelPosR = PixelPosXmin + (int)Math.Round(posw * (_rangeMax - _minimum) / (_maximum - _minimum));
@@ -723,6 +690,12 @@ namespace DoubleTrackBar
         private void OnResize(object sender, EventArgs e)
         {
             //RangePos2PixelPos();
+
+            if (LocalHeight < MinLocalHeight)
+            {
+                LocalHeight = MinLocalHeight;                
+            }
+               
             Invalidate(true);
         }
 
@@ -742,7 +715,7 @@ namespace DoubleTrackBar
 
         private void OnLeave(object sender, EventArgs e)
         {
-            _activeMark = ActiveMarkType.None;
+            _activeKnob = ActiveMarkType.None;
         }
 
         public virtual void OnRangeChanged(EventArgs e)
@@ -757,4 +730,8 @@ namespace DoubleTrackBar
                 RangeChanging(this, e);
         }
     }
+
+    public enum ActiveMarkType { None, Left, Right };
+    public enum RangeBarOrientation { Horizontal, Vertical };
+    public enum TopBottomOrientation { Top, Bottom, Both };
 }
